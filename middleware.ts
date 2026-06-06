@@ -5,10 +5,14 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next({ request })
 
   // Refresh the InsForge session so Server Components see fresh cookies
-  await updateSession({
-    requestCookies: request.cookies,
-    responseCookies: response.cookies,
-  })
+  try {
+    await updateSession({
+      requestCookies: request.cookies as unknown as Parameters<typeof updateSession>[0]['requestCookies'],
+      responseCookies: response.cookies as unknown as Parameters<typeof updateSession>[0]['responseCookies'],
+    })
+  } catch {
+    // Silently ignore refresh errors in middleware
+  }
 
   // Protect /dashboard routes — redirect to /login if no access token
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
