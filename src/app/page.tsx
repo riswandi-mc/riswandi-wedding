@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -11,8 +12,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, MessageCircle, Camera, Mail, MapPin, CheckCircle, Music, Info, Calendar, Phone, ExternalLink, Menu } from "lucide-react";
+import { Star, MessageCircle, Camera, Mail, MapPin, CheckCircle, Music, Info, Calendar as CalendarIcon, Phone, ExternalLink, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
 const WA_NUMBER = "6287737860657"; // Updated with real number
 
@@ -36,7 +41,19 @@ export default function Home() {
   const [mcForm, setMcForm] = useState({ nama: "", tanggal: "", layanan: "" });
 
   const [isUndanganOpen, setIsUndanganOpen] = useState(false);
-  const [undanganForm, setUndanganForm] = useState({ namaMempelai: "", tanggal: "", lokasi: "", template: "" });
+  const [undanganForm, setUndanganForm] = useState<{
+    namaMempelai: string;
+    tanggal: Date | undefined;
+    tanggalTarget: Date | undefined;
+    lokasi: string;
+    template: string;
+  }>({
+    namaMempelai: "",
+    tanggal: undefined,
+    tanggalTarget: undefined,
+    lokasi: "",
+    template: "",
+  });
 
   const handleMCOpen = (layanan: string) => {
     setMcForm({ nama: "", tanggal: "", layanan });
@@ -50,12 +67,21 @@ export default function Home() {
   };
 
   const handleUndanganOpen = (templateName: string = "") => {
-    setUndanganForm({ namaMempelai: "", tanggal: "", lokasi: "", template: templateName });
+    setUndanganForm({
+      namaMempelai: "",
+      tanggal: undefined,
+      tanggalTarget: undefined,
+      lokasi: "",
+      template: templateName,
+    });
     setIsUndanganOpen(true);
   };
 
   const handleUndanganSubmit = () => {
-    const text = `Halo Kak Riswandi! 👋\nSaya ingin memesan Undangan Pernikahan Digital.\n\n📋 Detail Pesanan:\n- Nama Mempelai : ${undanganForm.namaMempelai}\n- Tanggal Acara : ${undanganForm.tanggal}\n- Lokasi Acara  : ${undanganForm.lokasi}\n- Template      : ${undanganForm.template}\n\nSaya sudah memahami ketentuan pemesanan minimal 7 hari sebelum acara.\nMohon konfirmasi ketersediaan dan harga ya, terima kasih! 🙏`;
+    const formattedTanggal = undanganForm.tanggal ? format(undanganForm.tanggal, "dd MMMM yyyy", { locale: id }) : "-";
+    const formattedTanggalTarget = undanganForm.tanggalTarget ? format(undanganForm.tanggalTarget, "dd MMMM yyyy", { locale: id }) : "-";
+
+    const text = `Halo Kak Riswandi! 👋\nSaya ingin memesan Undangan Pernikahan Digital.\n\n📋 Detail Pesanan:\n- Nama Mempelai : ${undanganForm.namaMempelai}\n- Tanggal Acara : ${formattedTanggal}\n- Target Jadi Undangan : ${formattedTanggalTarget}\n- Lokasi Acara  : ${undanganForm.lokasi}\n- Template      : ${undanganForm.template}\n\nSaya sudah memahami ketentuan pemesanan minimal 7 hari sebelum acara.\nMohon konfirmasi ketersediaan dan harga ya, terima kasih! 🙏`;
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
     setIsUndanganOpen(false);
   };
@@ -250,7 +276,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-12">
               {undanganTemplates.map((tpl) => (
                 <Card key={tpl.id} className="group overflow-hidden border bg-background shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
                   <div className="aspect-[3/4] relative bg-muted overflow-hidden">
@@ -261,23 +287,26 @@ export default function Home() {
                       className="object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                   </div>
-                  <CardContent className="p-4 flex flex-col items-start gap-1 flex-1">
-                    <span className="font-semibold text-[15px] font-heading line-clamp-2">{tpl.name}</span>
-                    <span className="text-primary font-bold">{tpl.price}</span>
+                  <CardContent className="p-3 md:p-4 flex flex-col items-start gap-1 flex-1">
+                    <span className="font-semibold text-xs md:text-[15px] font-heading line-clamp-2">{tpl.name}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-muted-foreground line-through text-[10px] md:text-xs">Rp 59.000</span>
+                      <span className="text-primary font-bold text-xs md:text-sm">{tpl.price}</span>
+                    </div>
                   </CardContent>
-                  <CardFooter className="p-4 pt-0 w-full grid grid-cols-2 gap-2">
+                  <CardFooter className="p-3 md:p-4 pt-0 md:pt-0 w-full grid grid-cols-2 gap-1.5 md:gap-2">
                     {tpl.onProcess ? (
-                      <Button variant="outline" className="w-full text-xs opacity-70" disabled>
+                      <Button variant="outline" className="w-full text-[10px] md:text-xs opacity-70" disabled>
                         Proses
                       </Button>
                     ) : (
-                      <Button variant="outline" className="w-full text-xs px-0" asChild>
+                      <Button variant="outline" className="w-full text-[10px] md:text-xs px-0" asChild>
                         <a href={tpl.demo} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
-                          Demo <ExternalLink className="ml-1 w-3 h-3 shrink-0" />
+                          Demo <ExternalLink className="ml-1 w-2.5 h-2.5 md:w-3 md:h-3 shrink-0" />
                         </a>
                       </Button>
                     )}
-                    <Button className="w-full text-xs" onClick={() => handleUndanganOpen(tpl.name)}>
+                    <Button className="w-full text-[10px] md:text-xs" onClick={() => handleUndanganOpen(tpl.name)}>
                       Pesan
                     </Button>
                   </CardFooter>
@@ -306,7 +335,7 @@ export default function Home() {
             
             <div className="flex flex-col items-center text-center space-y-5 bg-background p-6">
               <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center border border-primary/20 shadow-sm">
-                <Calendar className="h-10 w-10 text-primary" />
+                <CalendarIcon className="h-10 w-10 text-primary" />
               </div>
               <div className="space-y-2">
                 <h3 className="text-xl font-bold font-heading">1. Pilih Layanan</h3>
@@ -591,13 +620,62 @@ export default function Home() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="tanggal-undangan">Tanggal Acara</Label>
-              <Input 
-                id="tanggal-undangan" 
-                placeholder="Cth: 20 Oktober 2026" 
-                value={undanganForm.tanggal}
-                onChange={(e) => setUndanganForm({...undanganForm, tanggal: e.target.value})}
-              />
+              <Label>Tanggal Acara</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-10 bg-background",
+                      !undanganForm.tanggal && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                    {undanganForm.tanggal ? (
+                      format(undanganForm.tanggal, "dd MMMM yyyy", { locale: id })
+                    ) : (
+                      <span>Pilih tanggal acara</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50 bg-background" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={undanganForm.tanggal}
+                    onSelect={(date) => setUndanganForm({ ...undanganForm, tanggal: date })}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="grid gap-2">
+              <Label>Tanggal Target Jadi Undangan</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-10 bg-background",
+                      !undanganForm.tanggalTarget && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                    {undanganForm.tanggalTarget ? (
+                      format(undanganForm.tanggalTarget, "dd MMMM yyyy", { locale: id })
+                    ) : (
+                      <span>Pilih tanggal target jadi</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50 bg-background" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={undanganForm.tanggalTarget}
+                    onSelect={(date) => setUndanganForm({ ...undanganForm, tanggalTarget: date })}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="lokasi-undangan">Lokasi Acara</Label>
