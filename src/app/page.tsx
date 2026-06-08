@@ -643,7 +643,6 @@ export default function Home() {
                     mode="single"
                     selected={undanganForm.tanggal}
                     onSelect={(date) => setUndanganForm({ ...undanganForm, tanggal: date })}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>
@@ -672,7 +671,6 @@ export default function Home() {
                     mode="single"
                     selected={undanganForm.tanggalTarget}
                     onSelect={(date) => setUndanganForm({ ...undanganForm, tanggalTarget: date })}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>
