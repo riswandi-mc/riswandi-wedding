@@ -222,7 +222,7 @@ export default function DashboardPage() {
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <Button size="icon-sm" variant="ghost" asChild>
-                        <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" title="Hubungi via WA">
+                        <a href="https://wa.me/6287737860657" target="_blank" rel="noopener noreferrer" title="Hubungi via WA">
                           <MessageCircle className="h-4 w-4 text-emerald-500" />
                         </a>
                       </Button>

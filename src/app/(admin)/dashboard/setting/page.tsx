@@ -27,7 +27,7 @@ export default function SettingsPage() {
 
   // WhatsApp Config States
   const [waConfig, setWaConfig] = useState({
-    phone: "6281234567890",
+    phone: "6287737860657",
     mcTemplate: "Halo Kak Riswandi! 👋\nSaya tertarik dengan layanan [layanan].\nNama saya: [nama]\nTanggal acara: [tanggal]\nMohon info lebih lanjut ya, terima kasih 🙏",
     invitationTemplate: "Halo Kak Riswandi! 👋\nSaya ingin memesan Undangan Pernikahan Digital.\n\n📋 Detail Pesanan:\n- Nama Mempelai : [namaMempelai]\n- Tanggal Acara : [tanggal]\n- Lokasi Acara  : [lokasi]\n- Template      : [template]\n\nMohon konfirmasi ketersediaan ya, terima kasih! 🙏"
   });
@@ -204,7 +204,7 @@ export default function SettingsPage() {
                         value={waConfig.phone}
                         onChange={(e) => setWaConfig({ ...waConfig, phone: e.target.value })}
                       />
-                      <p className="text-xs text-muted-foreground">Contoh format: 6281234567890 (Menggunakan prefix kode negara 62 untuk Indonesia)</p>
+                      <p className="text-xs text-muted-foreground">Contoh format: 6287737860657 (Menggunakan prefix kode negara 62 untuk Indonesia)</p>
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="wa-mc">Template Pesan Booking MC</Label>

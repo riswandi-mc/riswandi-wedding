@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Star, MessageCircle, Camera, Mail, MapPin, CheckCircle, Music, Info, Calendar, Phone, ExternalLink, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
-const WA_NUMBER = "6281234567890"; // Placeholder
+const WA_NUMBER = "6287737860657"; // Updated with real number
 
 const undanganTemplates = [
   { id: 1, name: "Undangan 1 (Soft & Romantis)", demo: "https://azzam-azhari.github.io/wedding-invitation/", price: "Rp 39.000", imgSig: 101 },
@@ -486,7 +486,7 @@ export default function Home() {
             <div className="flex flex-col gap-4 text-white/60 text-[15px] font-sans">
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 mt-0.5 shrink-0" />
-                <span>+62 812-3456-7890</span>
+                <span>+62 877-3786-0657</span>
               </div>
               <div className="flex items-start gap-3">
                 <Mail className="h-5 w-5 mt-0.5 shrink-0" />
