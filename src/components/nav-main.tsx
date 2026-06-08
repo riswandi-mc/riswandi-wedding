@@ -1,5 +1,6 @@
 "use client"
 
+import { usePathname } from "next/navigation"
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,6 +34,8 @@ export function NavMain({
   }[]
   title?: string
 }) {
+  const pathname = usePathname()
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
@@ -40,10 +43,15 @@ export function NavMain({
         {items.map((item) => {
           const hasSubItems = item.items && item.items.length > 0;
           
+          // Dynamically check if this item is active based on pathname
+          const isActive = item.url === "/dashboard"
+            ? pathname === "/dashboard"
+            : pathname.startsWith(item.url)
+
           if (!hasSubItems) {
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
+                <SidebarMenuButton asChild tooltip={item.title} isActive={isActive}>
                   <a href={item.url}>
                     {item.icon}
                     <span>{item.title}</span>
@@ -57,7 +65,7 @@ export function NavMain({
             <Collapsible
               key={item.title}
               asChild
-              defaultOpen={item.isActive}
+              defaultOpen={isActive}
               className="group/collapsible"
             >
               <SidebarMenuItem>

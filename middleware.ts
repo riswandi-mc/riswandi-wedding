@@ -14,14 +14,26 @@ export async function middleware(request: NextRequest) {
     // Silently ignore refresh errors in middleware
   }
 
+  // After refresh, check the response cookie (it may have been updated by updateSession)
+  // Fall back to request cookie if response didn't set a new one
+  const accessToken =
+    response.cookies.get('insforge_access_token')?.value ||
+    request.cookies.get('insforge_access_token')?.value
+
+  const pathname = request.nextUrl.pathname
+
   // Protect /dashboard routes — redirect to /login if no access token
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    const accessToken = request.cookies.get('insforge_access_token')?.value
-    if (!accessToken) {
-      const loginUrl = request.nextUrl.clone()
-      loginUrl.pathname = '/login'
-      return NextResponse.redirect(loginUrl)
-    }
+  if (pathname.startsWith('/dashboard') && !accessToken) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/login'
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Redirect logged-in users away from /login to /dashboard
+  if (pathname === '/login' && accessToken) {
+    const dashboardUrl = request.nextUrl.clone()
+    dashboardUrl.pathname = '/dashboard'
+    return NextResponse.redirect(dashboardUrl)
   }
 
   return response

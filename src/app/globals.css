@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant data-active (&[data-active=true]);
+@custom-variant data-open (&[data-state=open]);
 
 @theme inline {
   --color-background: var(--background);
