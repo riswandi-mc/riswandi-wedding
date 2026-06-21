@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,7 +18,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Image, Video, UploadCloud, Trash2, Plus, Search, Eye, Filter } from "lucide-react";
+import { Image as ImageIcon, Video, UploadCloud, Pencil, Trash2, Plus, Search, Loader2 } from "lucide-react";
+import { insforge } from "@/lib/insforge/client";
+import { uploadMediaAdmin } from "./uploadAction";
 
 type MediaItem = {
   id: number;
@@ -26,36 +28,129 @@ type MediaItem = {
   category: "Wedding" | "Corporate" | "Private" | "Undangan Digital";
   type: "image" | "video";
   url: string;
+  key?: string;
 };
 
-const initialMedia: MediaItem[] = [
-  { id: 1, title: "Wedding Reception A & B", category: "Wedding", type: "image", url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=600" },
-  { id: 2, title: "Interactive MC Ice Breaking", category: "Corporate", type: "image", url: "https://images.unsplash.com/photo-1511556820780-d912e42b4980?q=80&w=600" },
-  { id: 3, title: "Private Intimate Toasting", category: "Private", type: "image", url: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=600" },
-  { id: 4, title: "Corporate Gathering PT Maju", category: "Corporate", type: "image", url: "https://images.unsplash.com/photo-1478146896981-b80fe463b330?q=80&w=600" },
-  { id: 5, title: "MC Duo Stage Presentation", category: "Wedding", type: "image", url: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=600" },
-];
-
 export default function GaleriUploadPage() {
-  const [mediaList, setMediaList] = useState<MediaItem[]>(initialMedia);
+  const [mediaList, setMediaList] = useState<MediaItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Add Media Dialog
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [newMedia, setNewMedia] = useState({ title: "", category: "Wedding" as MediaItem["category"], type: "image" as MediaItem["type"], url: "" });
+  const [isUploading, setIsUploading] = useState(false);
+  const [newMedia, setNewMedia] = useState({ title: "", category: "Wedding" as MediaItem["category"], type: "image" as MediaItem["type"] });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const handleAddSubmit = () => {
-    // Fallback unsplash image if url not provided
-    const url = newMedia.url || "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=600";
-    setMediaList([...mediaList, { id: Date.now(), ...newMedia, url }]);
-    setIsAddOpen(false);
-    setNewMedia({ title: "", category: "Wedding", type: "image", url: "" });
+  useEffect(() => {
+    fetchMedia();
+  }, []);
+
+  const fetchMedia = async () => {
+    setIsLoading(true);
+    const { data, error } = await insforge.database
+      .from("galeri")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching media:", error);
+    } else {
+      setMediaList(data || []);
+    }
+    setIsLoading(false);
   };
 
-  const handleDelete = (id: number) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleAddSubmit = async () => {
+    if (!selectedFile) {
+      alert("Pilih file terlebih dahulu!");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Generate random file name to prevent collision
+      const fileExt = selectedFile.name.split(".").pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `${newMedia.category}/${fileName}`;
+
+      // Upload file to InsForge storage using Server Action to bypass permission issues
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("fileName", filePath);
+
+      const uploadResult = await uploadMediaAdmin(formData);
+
+      if (uploadResult.error) {
+        throw new Error(uploadResult.error);
+      }
+
+      const uploadData = uploadResult.data;
+      if (!uploadData) throw new Error("Upload failed");
+
+      const publicUrl = insforge.storage
+        .from("galeri")
+        .getPublicUrl(filePath);
+
+      const { data: insertData, error: insertError } = await insforge.database
+        .from("galeri")
+        .insert([{
+          title: newMedia.title || "Untitled",
+          category: newMedia.category,
+          type: newMedia.type,
+          url: publicUrl,
+          key: uploadData.key || filePath,
+          size: uploadData.size || selectedFile.size
+        }])
+        .select();
+
+      if (insertError) throw insertError;
+
+      if (insertData && insertData.length > 0) {
+        setMediaList([insertData[0], ...mediaList]);
+      }
+      
+      setIsAddOpen(false);
+      setNewMedia({ title: "", category: "Wedding", type: "image" });
+      setSelectedFile(null);
+    } catch (error: any) {
+      console.error("Error uploading media:", error);
+      alert(`Gagal mengupload media. Detail error: ${error?.message || JSON.stringify(error)}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDelete = async (id: number, key?: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus media ini dari galeri?")) {
-      setMediaList(mediaList.filter(item => item.id !== id));
+      try {
+        if (key) {
+          const { error: storageError } = await insforge.storage
+            .from("galeri")
+            .remove(key);
+          if (storageError) throw storageError;
+        }
+
+        const { error: dbError } = await insforge.database
+          .from("galeri")
+          .delete()
+          .eq("id", id);
+          
+        if (dbError) throw dbError;
+
+        setMediaList(mediaList.filter(item => item.id !== id));
+      } catch (error) {
+        console.error("Error deleting media:", error);
+        alert("Gagal menghapus media.");
+      }
     }
   };
 
@@ -98,20 +193,6 @@ export default function GaleriUploadPage() {
           </Button>
         </div>
 
-        {/* Drag and Drop Zone Mockup */}
-        <Card className="border-dashed border-2 border-primary/20 hover:border-primary/50 transition-colors shadow-sm bg-background">
-          <CardContent className="p-8 flex flex-col items-center justify-center text-center cursor-pointer space-y-3">
-            <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center border border-primary/10">
-              <UploadCloud className="h-8 w-8 text-primary" />
-            </div>
-            <div className="space-y-1">
-              <p className="font-semibold font-heading text-base">Tarik & Lepas file ke sini, atau klik untuk memilih</p>
-              <p className="text-xs text-muted-foreground font-sans">Mendukung format PNG, JPG, JPEG, MP4 (Maks. 5MB per file)</p>
-            </div>
-            <Button variant="outline" size="sm" className="font-sans">Pilih File</Button>
-          </CardContent>
-        </Card>
-
         {/* Filter Toolbar */}
         <Card className="shadow-sm">
           <CardContent className="p-4 flex flex-col sm:flex-row gap-4">
@@ -142,45 +223,51 @@ export default function GaleriUploadPage() {
         </Card>
 
         {/* Media Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredMedia.length > 0 ? (
-            filteredMedia.map((item) => (
-              <Card key={item.id} className="group overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col bg-background">
-                <div className="aspect-video relative bg-muted overflow-hidden">
-                  <img
-                    src={item.url}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <Badge className="absolute top-3 left-3 bg-black/60 text-white hover:bg-black/60 backdrop-blur-sm border-none font-normal text-xs px-2 py-0.5">
-                    {item.category}
-                  </Badge>
-                  {item.type === "video" && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/25">
-                      <Video className="w-8 h-8 text-white drop-shadow-md" />
-                    </div>
-                  )}
-                </div>
-                <CardContent className="p-4 flex-1 flex flex-col justify-between gap-3">
-                  <span className="font-semibold text-sm font-heading line-clamp-2">{item.title}</span>
-                  <div className="flex justify-between items-center mt-auto border-t pt-3">
-                    <span className="text-[10px] uppercase font-mono text-muted-foreground tracking-wider flex items-center gap-1">
-                      {item.type === "video" ? <Video className="w-3.5 h-3.5" /> : <Image className="w-3.5 h-3.5" />}
-                      {item.type}
-                    </span>
-                    <Button size="icon-xs" variant="ghost" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(item.id)} title="Hapus">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredMedia.length > 0 ? (
+              filteredMedia.map((item) => (
+                <Card key={item.id} className="group overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col bg-background">
+                  <div className="aspect-video relative bg-muted overflow-hidden">
+                    <img
+                      src={item.url}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <Badge className="absolute top-3 left-3 bg-black/60 text-white hover:bg-black/60 backdrop-blur-sm border-none font-normal text-xs px-2 py-0.5">
+                      {item.category}
+                    </Badge>
+                    {item.type === "video" && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/25">
+                        <Video className="w-8 h-8 text-white drop-shadow-md" />
+                      </div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-full py-12 text-center text-muted-foreground font-sans">
-              Tidak ada dokumentasi media ditemukan.
-            </div>
-          )}
-        </div>
+                  <CardContent className="p-4 flex-1 flex flex-col justify-between gap-3">
+                    <span className="font-semibold text-sm font-heading line-clamp-2">{item.title}</span>
+                    <div className="flex justify-between items-center mt-auto border-t pt-3">
+                      <span className="text-[10px] uppercase font-mono text-muted-foreground tracking-wider flex items-center gap-1">
+                        {item.type === "video" ? <Video className="w-3.5 h-3.5" /> : <ImageIcon className="w-3.5 h-3.5" />}
+                        {item.type}
+                      </span>
+                      <Button size="icon-xs" variant="ghost" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(item.id, item.key)} title="Hapus">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center text-muted-foreground font-sans">
+                Tidak ada dokumentasi media ditemukan.
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
       {/* --- ADD MEDIA DIALOG --- */}
@@ -189,7 +276,7 @@ export default function GaleriUploadPage() {
           <DialogHeader>
             <DialogTitle>Tambah Dokumentasi Galeri</DialogTitle>
             <DialogDescription>
-              Isi data di bawah ini untuk menambahkan media ke galeri landing page.
+              Isi data di bawah ini untuk mengupload media ke galeri landing page.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -235,18 +322,20 @@ export default function GaleriUploadPage() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="url">URL Gambar / Video Cover (Opsional)</Label>
+              <Label htmlFor="file">File Media (Max 5MB)</Label>
               <Input
-                id="url"
-                placeholder="Cth: https://images.unsplash.com/..."
-                value={newMedia.url}
-                onChange={(e) => setNewMedia({ ...newMedia, url: e.target.value })}
+                id="file"
+                type="file"
+                accept="image/*,video/*"
+                onChange={handleFileChange}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Batal</Button>
-            <Button onClick={handleAddSubmit}>Simpan Media</Button>
+            <Button variant="outline" onClick={() => setIsAddOpen(false)} disabled={isUploading}>Batal</Button>
+            <Button onClick={handleAddSubmit} disabled={isUploading || !selectedFile}>
+              {isUploading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Mengupload...</> : "Simpan Media"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

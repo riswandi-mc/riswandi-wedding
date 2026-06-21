@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,12 +12,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, MessageCircle, Camera, Mail, MapPin, CheckCircle, Music, Info, Calendar as CalendarIcon, Phone, ExternalLink, Menu } from "lucide-react";
+import { Star, MessageCircle, Camera, Mail, MapPin, CheckCircle, Music, Info, Calendar as CalendarIcon, Phone, ExternalLink, Menu, Video } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { insforge } from "@/lib/insforge/client";
 
 const WA_NUMBER = "6287737860657"; // Updated with real number
 
@@ -40,7 +41,21 @@ export default function Home() {
   const [isMCOpen, setIsMCOpen] = useState(false);
   const [mcForm, setMcForm] = useState({ nama: "", tanggal: "", layanan: "" });
 
+  // Galeri State
+  const [galeriMedia, setGaleriMedia] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchGaleri = async () => {
+      const { data } = await insforge.database.from("galeri").select("*").order("created_at", { ascending: false }).limit(6);
+      if (data) setGaleriMedia(data);
+    };
+    fetchGaleri();
+  }, []);
+
   const [isUndanganOpen, setIsUndanganOpen] = useState(false);
+  const [isWAPopupOpen, setIsWAPopupOpen] = useState(false);
+  const [waText, setWaText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [undanganForm, setUndanganForm] = useState<{
     namaMempelai: string;
     tanggal: Date | undefined;
@@ -77,13 +92,36 @@ export default function Home() {
     setIsUndanganOpen(true);
   };
 
-  const handleUndanganSubmit = () => {
+  const handleUndanganSubmit = async () => {
+    setIsSubmitting(true);
     const formattedTanggal = undanganForm.tanggal ? format(undanganForm.tanggal, "dd MMMM yyyy", { locale: id }) : "-";
     const formattedTanggalTarget = undanganForm.tanggalTarget ? format(undanganForm.tanggalTarget, "dd MMMM yyyy", { locale: id }) : "-";
 
     const text = `Halo Kak Riswandi! 👋\nSaya ingin memesan Undangan Pernikahan Digital.\n\n📋 Detail Pesanan:\n- Nama Mempelai : ${undanganForm.namaMempelai}\n- Tanggal Acara : ${formattedTanggal}\n- Target Jadi Undangan : ${formattedTanggalTarget}\n- Lokasi Acara  : ${undanganForm.lokasi}\n- Template      : ${undanganForm.template}\n\nSaya sudah memahami ketentuan pemesanan minimal 7 hari sebelum acara.\nMohon konfirmasi ketersediaan dan harga ya, terima kasih! 🙏`;
-    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
+
+    try {
+      const { error } = await insforge.database.from("pesanan_undangan").insert([{
+        couple_name: undanganForm.namaMempelai,
+        template: undanganForm.template,
+        date: formattedTanggal,
+        target_date: formattedTanggalTarget,
+        location: undanganForm.lokasi,
+        phone: "-",
+        status: "New"
+      }]);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error("Gagal menyimpan pesanan ke database:", error);
+      alert("Pesanan gagal tersimpan di sistem, namun Anda tetap bisa melanjutkan pesanan manual via WhatsApp.");
+    }
+
+    setWaText(text);
+    setIsSubmitting(false);
     setIsUndanganOpen(false);
+    setIsWAPopupOpen(true);
   };
 
   return (
@@ -94,7 +132,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <span className="font-heading font-bold text-xl tracking-tight">Riswandi Wedding</span>
           </div>
-          
+
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-6 text-sm font-medium">
             <a href="#layanan" className="hover:text-primary transition-colors">Layanan</a>
@@ -103,7 +141,7 @@ export default function Home() {
             <a href="#galeri" className="hover:text-primary transition-colors">Galeri</a>
             <a href="#faq" className="hover:text-primary transition-colors">FAQ</a>
           </nav>
-          
+
           <div className="flex items-center gap-2">
             {/* Desktop / Tablet CTA Button */}
             <Button asChild size="sm" className="hidden sm:inline-flex">
@@ -111,7 +149,7 @@ export default function Home() {
                 Hubungi Kami
               </a>
             </Button>
-            
+
             {/* Mobile Hamburger Menu */}
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>
@@ -149,14 +187,14 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative w-full h-[80vh] flex items-center justify-center bg-muted overflow-hidden">
           <div className="absolute inset-0 z-0">
-             {/* Using Unsplash Image for Mockup */}
-             <Image 
-                src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070&auto=format&fit=crop" 
-                alt="Wedding Event" 
-                fill 
-                className="object-cover brightness-50"
-                priority
-             />
+            {/* Using Unsplash Image for Mockup */}
+            <Image
+              src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070&auto=format&fit=crop"
+              alt="Wedding Event"
+              fill
+              className="object-cover brightness-50"
+              priority
+            />
           </div>
           <div className="relative z-10 container px-4 flex flex-col items-center text-center text-white space-y-6">
             <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30 backdrop-blur border-none py-1.5 px-4">
@@ -170,10 +208,10 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
               <Button asChild size="lg" className="text-base h-12 px-8">
-                 <a href="#layanan">Lihat Layanan</a>
+                <a href="#layanan">Lihat Layanan</a>
               </Button>
               <Button variant="outline" size="lg" onClick={() => handleMCOpen("")} className="text-base h-12 px-8 bg-black/20 text-white border-white/50 hover:bg-white hover:text-black backdrop-blur">
-                 Booking Sekarang
+                Booking Sekarang
               </Button>
             </div>
           </div>
@@ -187,7 +225,7 @@ export default function Home() {
               Beragam pilihan paket Master of Ceremony yang dapat disesuaikan dengan kebutuhan acara Anda.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Card 1 */}
             <Card className="flex flex-col border-primary/20 hover:border-primary transition-colors shadow-sm hover:shadow-md">
@@ -280,7 +318,7 @@ export default function Home() {
               {undanganTemplates.map((tpl) => (
                 <Card key={tpl.id} className="group overflow-hidden border bg-background shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
                   <div className="aspect-[3/4] relative bg-muted overflow-hidden">
-                    <Image 
+                    <Image
                       src={`https://images.unsplash.com/photo-1528605105345-5344ea20e269?q=80&w=800&auto=format&fit=crop&sig=${tpl.imgSig}`}
                       alt={tpl.name}
                       fill
@@ -332,7 +370,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto relative">
             {/* Connecting line for desktop */}
             <div className="hidden md:block absolute top-[4.5rem] left-[16%] right-[16%] h-0.5 bg-border -z-10"></div>
-            
+
             <div className="flex flex-col items-center text-center space-y-5 bg-background p-6">
               <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center border border-primary/20 shadow-sm">
                 <CalendarIcon className="h-10 w-10 text-primary" />
@@ -424,31 +462,56 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[180px] sm:auto-rows-[250px]">
-            <div className="col-span-2 row-span-2 relative rounded-xl overflow-hidden group shadow-sm">
-               <Image src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2069&auto=format&fit=crop" alt="Event" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                 <span className="text-white font-heading font-medium text-lg">Wedding Reception</span>
-               </div>
-            </div>
-            <div className="relative rounded-xl overflow-hidden group shadow-sm">
-               <Image src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=2070&auto=format&fit=crop" alt="Wedding" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-            </div>
-            <div className="relative rounded-xl overflow-hidden group row-span-2 shadow-sm">
-               <Image src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070&auto=format&fit=crop" alt="Stage" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-            </div>
-            <div className="relative rounded-xl overflow-hidden group shadow-sm">
-               <Image src="https://images.unsplash.com/photo-1511556820780-d912e42b4980?q=80&w=1974&auto=format&fit=crop" alt="Corporate" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-            </div>
-            <div className="col-span-2 relative rounded-xl overflow-hidden group shadow-sm">
-               <Image src="https://images.unsplash.com/photo-1478146896981-b80fe463b330?q=80&w=2070&auto=format&fit=crop" alt="Party" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-            </div>
+            {galeriMedia.length > 0 ? (
+              galeriMedia.map((item, index) => {
+                // Buat variasi ukuran berdasarkan index untuk masonry effect
+                const isLarge = index === 0;
+                const isTall = index === 2;
+                const isWide = index === 4;
+
+                return (
+                  <div
+                    key={item.id}
+                    className={cn(
+                      "relative rounded-xl overflow-hidden group shadow-sm",
+                      isLarge && "col-span-2 row-span-2",
+                      isTall && "row-span-2",
+                      isWide && "col-span-2"
+                    )}
+                  >
+                    <Image
+                      src={item.url}
+                      alt={item.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                      <span className="text-white font-heading font-medium text-lg">{item.title}</span>
+                    </div>
+                    {item.type === "video" && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-12 h-12 bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm">
+                          <Video className="w-6 h-6 text-white" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              // Tampilkan placeholder loading atau text jika belum ada data
+              <div className="col-span-full py-20 text-center flex flex-col items-center text-muted-foreground">
+                <Camera className="w-12 h-12 mb-4 opacity-20" />
+                <p>Belum ada dokumentasi acara yang diunggah.</p>
+              </div>
+            )}
           </div>
-          
+
           <div className="mt-12 text-center">
-             <Button variant="outline" size="lg" className="rounded-full px-8 group">
-               Lihat Lebih Banyak di Instagram
-               <Camera className="ml-2 w-4 h-4 group-hover:text-pink-600 transition-colors" />
-             </Button>
+            <Button variant="outline" size="lg" className="rounded-full px-8 group" onClick={() => window.open('https://www.instagram.com/mriswandiwedding__/')}>
+              Lihat Lebih Banyak di Instagram
+              <Camera className="ml-2 w-4 h-4 group-hover:text-pink-600 transition-colors" />
+            </Button>
           </div>
         </section>
 
@@ -459,7 +522,7 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary">Frequently Asked Questions</h2>
               <p className="text-muted-foreground font-sans">Jawaban dari pertanyaan yang paling sering diajukan kepada kami.</p>
             </div>
-            
+
             <Accordion type="single" collapsible className="w-full bg-background rounded-2xl border px-6 py-2 shadow-sm">
               <AccordionItem value="item-1" className="border-b border-border/50">
                 <AccordionTrigger className="text-left font-semibold text-[15px] hover:text-primary hover:no-underline py-4">Apakah bisa request lagu atau script MC?</AccordionTrigger>
@@ -499,7 +562,7 @@ export default function Home() {
               Menyediakan layanan MC profesional dan undangan digital elegan untuk menyempurnakan dan mengabadikan momen bahagia di hari istimewa Anda.
             </p>
           </div>
-          
+
           <div className="md:col-span-3 space-y-6">
             <h4 className="font-semibold text-lg font-heading tracking-wide">Tautan Cepat</h4>
             <nav className="flex flex-col gap-3 text-white/60 text-[15px] font-sans">
@@ -519,11 +582,11 @@ export default function Home() {
               </div>
               <div className="flex items-start gap-3">
                 <Mail className="h-5 w-5 mt-0.5 shrink-0" />
-                <span>hello@riswandiwedding.com</span>
+                <span>[EMAIL_ADDRESS]</span>
               </div>
               <div className="flex items-start gap-3">
                 <Camera className="h-5 w-5 mt-0.5 shrink-0" />
-                <a href="#" className="hover:text-white transition-colors">@riswandiwedding</a>
+                <a href="#" className="hover:text-white transition-colors">@mriswandiwedding_</a>
               </div>
             </div>
           </div>
@@ -549,7 +612,7 @@ export default function Home() {
       </a>
 
       {/* --- MODALS --- */}
-      
+
       {/* Modal Booking MC */}
       <Dialog open={isMCOpen} onOpenChange={setIsMCOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -562,25 +625,25 @@ export default function Home() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="nama-mc">Nama Anda</Label>
-              <Input 
-                id="nama-mc" 
-                placeholder="Cth: Budi & Rina" 
+              <Input
+                id="nama-mc"
+                placeholder="Cth: Budi & Rina"
                 value={mcForm.nama}
-                onChange={(e) => setMcForm({...mcForm, nama: e.target.value})}
+                onChange={(e) => setMcForm({ ...mcForm, nama: e.target.value })}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="tanggal-mc">Tanggal Acara</Label>
-              <Input 
-                id="tanggal-mc" 
-                placeholder="Cth: 12 Desember 2026" 
+              <Input
+                id="tanggal-mc"
+                placeholder="Cth: 12 Desember 2026"
                 value={mcForm.tanggal}
-                onChange={(e) => setMcForm({...mcForm, tanggal: e.target.value})}
+                onChange={(e) => setMcForm({ ...mcForm, tanggal: e.target.value })}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="layanan-mc">Pilihan Layanan</Label>
-              <Select value={mcForm.layanan} onValueChange={(val) => setMcForm({...mcForm, layanan: val})}>
+              <Select value={mcForm.layanan} onValueChange={(val) => setMcForm({ ...mcForm, layanan: val })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Layanan" />
                 </SelectTrigger>
@@ -612,11 +675,11 @@ export default function Home() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="nama-undangan">Nama Mempelai Pria & Wanita</Label>
-              <Input 
-                id="nama-undangan" 
-                placeholder="Cth: Romeo & Juliet" 
+              <Input
+                id="nama-undangan"
+                placeholder="Cth: Romeo & Juliet"
                 value={undanganForm.namaMempelai}
-                onChange={(e) => setUndanganForm({...undanganForm, namaMempelai: e.target.value})}
+                onChange={(e) => setUndanganForm({ ...undanganForm, namaMempelai: e.target.value })}
               />
             </div>
             <div className="grid gap-2">
@@ -677,16 +740,16 @@ export default function Home() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="lokasi-undangan">Lokasi Acara</Label>
-              <Input 
-                id="lokasi-undangan" 
-                placeholder="Cth: Gedung Manggala Wanabakti, Jakarta" 
+              <Input
+                id="lokasi-undangan"
+                placeholder="Cth: Gedung Manggala Wanabakti, Jakarta"
                 value={undanganForm.lokasi}
-                onChange={(e) => setUndanganForm({...undanganForm, lokasi: e.target.value})}
+                onChange={(e) => setUndanganForm({ ...undanganForm, lokasi: e.target.value })}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="template-undangan">Pilihan Template</Label>
-              <Select value={undanganForm.template} onValueChange={(val) => setUndanganForm({...undanganForm, template: val})}>
+              <Select value={undanganForm.template} onValueChange={(val) => setUndanganForm({ ...undanganForm, template: val })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Template" />
                 </SelectTrigger>
@@ -699,7 +762,33 @@ export default function Home() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleUndanganSubmit} className="w-full flex items-center justify-center gap-2">
+            <Button onClick={handleUndanganSubmit} disabled={isSubmitting} className="w-full flex items-center justify-center gap-2">
+              {isSubmitting ? "Memproses..." : "Pesan Sekarang"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Konfirmasi WhatsApp */}
+      <Dialog open={isWAPopupOpen} onOpenChange={setIsWAPopupOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Pesanan Berhasil Dicatat</DialogTitle>
+            <DialogDescription>
+              Data pesanan Anda telah tersimpan di sistem kami. Silakan lanjutkan ke WhatsApp untuk konfirmasi langsung dengan Admin kami.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-muted p-4 rounded-md text-sm whitespace-pre-wrap text-muted-foreground border">
+              {waText}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsWAPopupOpen(false)}>Batal</Button>
+            <Button onClick={() => {
+              window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waText)}`, "_blank");
+              setIsWAPopupOpen(false);
+            }} className="flex items-center justify-center gap-2">
               Lanjut ke WhatsApp <MessageCircle className="w-4 h-4" />
             </Button>
           </DialogFooter>

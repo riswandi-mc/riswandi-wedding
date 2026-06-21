@@ -86,25 +86,22 @@ export default function SettingsPage() {
         <div className="flex border-b border-border gap-2 font-sans text-sm font-medium">
           <button
             onClick={() => setActiveTab("profile")}
-            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-all ${
-              activeTab === "profile" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
+            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-all ${activeTab === "profile" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
           >
             <User className="w-4 h-4" /> Profil Admin
           </button>
           <button
             onClick={() => setActiveTab("whatsapp")}
-            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-all ${
-              activeTab === "whatsapp" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
+            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-all ${activeTab === "whatsapp" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
           >
             <Phone className="w-4 h-4" /> Integrasi WhatsApp
           </button>
           <button
             onClick={() => setActiveTab("system")}
-            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-all ${
-              activeTab === "system" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
+            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-all ${activeTab === "system" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
           >
             <Terminal className="w-4 h-4" /> Endpoint & API
           </button>
@@ -286,7 +283,7 @@ export default function SettingsPage() {
               <CardContent className="space-y-3 text-xs font-sans text-muted-foreground">
                 <div className="flex justify-between py-1 border-b">
                   <span>Host Domain</span>
-                  <span className="font-semibold text-foreground">riswandiwedding.com</span>
+                  <span className="font-semibold text-foreground">mriswandiwedding_.com</span>
                 </div>
                 <div className="flex justify-between py-1 border-b">
                   <span>SSl Status</span>

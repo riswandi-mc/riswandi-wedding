@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { insforge } from "@/lib/insforge/client";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,52 +23,76 @@ import { MessageCircle, Trash2, Plus, Search, ExternalLink, Sparkles, Hourglass,
 
 type Order = {
   id: string;
-  coupleName: string;
+  couple_name: string;
   template: string;
   date: string;
+  target_date: string;
   location: string;
   phone: string;
   status: "New" | "In Progress" | "Review" | "Selesai";
 };
 
-const initialOrders: Order[] = [
-  { id: "ORD-001", coupleName: "Sarah & Dimas", template: "Undangan 1 (Soft & Romantis)", date: "24 Okt 2026", location: "Gedung Manggala Wanabakti, Jkt", phone: "6281234567891", status: "In Progress" },
-  { id: "ORD-002", coupleName: "Adi & Citra", template: "Undangan 3 (Fresh & Premium)", date: "15 Nov 2026", location: "Hotel Santika, Bekasi", phone: "6281234567892", status: "New" },
-  { id: "ORD-003", coupleName: "Reza & Bella", template: "Undangan 4 (Minimalis & Elegan)", date: "02 Des 2026", location: "Kramat Jati, Jakarta Timur", phone: "6281234567893", status: "Review" },
-  { id: "ORD-004", coupleName: "Rian & Mita", template: "Undangan 5 (Floral / Botanical)", date: "12 Des 2026", location: "Balai Kartini, Jakarta", phone: "6281234567894", status: "Selesai" },
-  { id: "ORD-005", coupleName: "Taufik & Nisa", template: "Undangan 7 (Stylish & Luxury)", date: "20 Jan 2027", location: "Aura Hall, Depok", phone: "6281234567895", status: "New" },
-];
-
 export default function PesananUndanganPage() {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [templateFilter, setTemplateFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    const { data, error } = await insforge.database
+      .from("pesanan_undangan")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (data) {
+      setOrders(data as Order[]);
+    }
+  };
+
   // Add Order Modal States
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [newOrder, setNewOrder] = useState({ coupleName: "", template: "Undangan 1 (Soft & Romantis)", date: "", location: "", phone: "", status: "New" as Order["status"] });
+  const [newOrder, setNewOrder] = useState({ couple_name: "", template: "Undangan 1 (Soft & Romantis)", date: "", target_date: "", location: "", phone: "", status: "New" as Order["status"] });
 
-  const handleAddSubmit = () => {
-    const id = `ORD-00${orders.length + 1}`;
-    setOrders([...orders, { id, ...newOrder }]);
-    setIsAddOpen(false);
-    setNewOrder({ coupleName: "", template: "Undangan 1 (Soft & Romantis)", date: "", location: "", phone: "", status: "New" });
+  const handleAddSubmit = async () => {
+    const { data, error } = await insforge.database
+      .from("pesanan_undangan")
+      .insert([newOrder])
+      .select();
+    if (data && data.length > 0) {
+      setOrders([data[0] as Order, ...orders]);
+      setIsAddOpen(false);
+      setNewOrder({ couple_name: "", template: "Undangan 1 (Soft & Romantis)", date: "", target_date: "", location: "", phone: "", status: "New" });
+    }
   };
 
-  const handleStatusChange = (id: string, newStatus: Order["status"]) => {
-    setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
+  const handleStatusChange = async (id: string, newStatus: Order["status"]) => {
+    const { error } = await insforge.database
+      .from("pesanan_undangan")
+      .update({ status: newStatus })
+      .eq("id", id);
+    if (!error) {
+      setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus data pesanan ini?")) {
-      setOrders(orders.filter(o => o.id !== id));
+      const { error } = await insforge.database
+        .from("pesanan_undangan")
+        .delete()
+        .eq("id", id);
+      if (!error) {
+        setOrders(orders.filter(o => o.id !== id));
+      }
     }
   };
 
   const filteredOrders = orders.filter(o => {
-    const matchesSearch = o.coupleName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.toLowerCase().includes(searchTerm.toLowerCase()) || o.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTemplate = templateFilter === "all" || o.template.includes(templateFilter);
+    const matchesSearch = o.couple_name?.toLowerCase().includes(searchTerm.toLowerCase()) || o.id?.toLowerCase().includes(searchTerm.toLowerCase()) || o.location?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTemplate = templateFilter === "all" || o.template?.includes(templateFilter);
     const matchesStatus = statusFilter === "all" || o.status === statusFilter;
     return matchesSearch && matchesTemplate && matchesStatus;
   });
@@ -181,8 +206,8 @@ export default function PesananUndanganPage() {
                 {filteredOrders.length > 0 ? (
                   filteredOrders.map((item) => (
                     <tr key={item.id} className="border-b hover:bg-muted/10 transition-colors">
-                      <td className="py-4 px-6 font-medium font-mono text-xs">{item.id}</td>
-                      <td className="py-4 px-6 font-semibold">{item.coupleName}</td>
+                      <td className="py-4 px-6 font-medium font-mono text-xs">{item.id?.split("-")[0]}</td>
+                      <td className="py-4 px-6 font-semibold">{item.couple_name}</td>
                       <td className="py-4 px-6">
                         <Badge variant="outline" className="font-normal text-xs">{item.template}</Badge>
                       </td>
@@ -210,7 +235,7 @@ export default function PesananUndanganPage() {
                         <div className="flex justify-center gap-2">
                           <Button size="icon-sm" variant="ghost" asChild>
                             <a
-                              href={`https://wa.me/${item.phone}?text=${encodeURIComponent(`Halo Kak ${item.coupleName}! Ini Riswandi. Berikut link draft/revisi undangan digital Kakak. Silakan di-review ya Kak: https://riswandiwedding.com/demo/template-1`)}`}
+                              href={`https://wa.me/${item.phone}?text=${encodeURIComponent(`Halo Kak ${item.couple_name}! Ini Riswandi. Berikut link draft/revisi undangan digital Kakak. Silakan di-review ya Kak: https://mriswandiwedding_.com/demo/template-1`)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               title="Chat WhatsApp"
@@ -249,12 +274,12 @@ export default function PesananUndanganPage() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="coupleName">Nama Mempelai</Label>
+              <Label htmlFor="couple_name">Nama Mempelai</Label>
               <Input
-                id="coupleName"
+                id="couple_name"
                 placeholder="Cth: Romeo & Juliet"
-                value={newOrder.coupleName}
-                onChange={(e) => setNewOrder({ ...newOrder, coupleName: e.target.value })}
+                value={newOrder.couple_name}
+                onChange={(e) => setNewOrder({ ...newOrder, couple_name: e.target.value })}
               />
             </div>
             <div className="grid gap-2">
