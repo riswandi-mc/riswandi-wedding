@@ -13,19 +13,22 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Mencegah inisialisasi ulang saat hot-reload
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app, db, auth, analytics;
 
-// Inisialisasi Firestore
-const db = getFirestore(app);
+if (firebaseConfig.apiKey) {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    db = getFirestore(app);
+    auth = getAuth(app);
 
-// Inisialisasi Auth
-const auth = getAuth(app);
-
-// Analytics hanya berjalan di client-side (browser)
-let analytics;
-if (typeof window !== "undefined") {
-    isSupported().then((yes) => yes && (analytics = getAnalytics(app)));
+    if (typeof window !== "undefined") {
+        isSupported().then((yes) => yes && (analytics = getAnalytics(app)));
+    }
+} else {
+    console.warn("⚠️ Firebase API Key is missing. Firebase initialization skipped.");
+    // Placeholder objects to prevent destructuring/import errors during Next.js build
+    app = {};
+    db = {};
+    auth = { currentUser: null };
 }
 
 export { app, analytics, db, auth };
