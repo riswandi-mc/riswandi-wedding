@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { User, Phone, Terminal, CheckCircle2, Key, Save, ShieldAlert } from "lucide-react";
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<"profile" | "whatsapp" | "system">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "whatsapp">("profile");
 
   // Profile Form States
   const [profile, setProfile] = useState({ name: "Riswandi", email: "riswandi.wedding@gmail.com", role: "Super Administrator" });
@@ -31,28 +33,54 @@ export default function SettingsPage() {
     mcTemplate: "Halo Kak Riswandi! 👋\nSaya tertarik dengan layanan [layanan].\nNama saya: [nama]\nTanggal acara: [tanggal]\nMohon info lebih lanjut ya, terima kasih 🙏",
     invitationTemplate: "Halo Kak Riswandi! 👋\nSaya ingin memesan Undangan Pernikahan Digital.\n\n📋 Detail Pesanan:\n- Nama Mempelai : [namaMempelai]\n- Tanggal Acara : [tanggal]\n- Lokasi Acara  : [lokasi]\n- Template      : [template]\n\nMohon konfirmasi ketersediaan ya, terima kasih! 🙏"
   });
+  const [isWaLoading, setIsWaLoading] = useState(false);
+  const [isWaSaving, setIsWaSaving] = useState(false);
 
-  // System/API Insforge Mock
-  const [apiConfig, setApiConfig] = useState({
-    endpoint: "https://api.insforge.com/v1/wedding",
-    token: "if_live_9a8f273b4d21e89c09a128bc4e9c7d",
-    status: "Connected"
-  });
+  useEffect(() => {
+    const fetchWaConfig = async () => {
+      setIsWaLoading(true);
+      try {
+        const docRef = doc(db, "noWa", "nomer");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setWaConfig(prev => ({ ...prev, phone: data.nomer || "6287737860657" }));
+        } else {
+          // Buat default document jika belum ada
+          await setDoc(docRef, { nomer: "6287737860657" }, { merge: true });
+        }
+      } catch (error) {
+        console.error("Gagal mengambil data WA:", error);
+      } finally {
+        setIsWaLoading(false);
+      }
+    };
+    fetchWaConfig();
+  }, []);
+
+  // API settings removed
 
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
     alert("Profil admin berhasil diperbarui!");
   };
 
-  const handleWaSave = (e: React.FormEvent) => {
+  const handleWaSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Pengaturan integrasi WhatsApp berhasil disimpan!");
+    setIsWaSaving(true);
+    try {
+      const docRef = doc(db, "noWa", "nomer");
+      await setDoc(docRef, { nomer: waConfig.phone }, { merge: true });
+      alert("Pengaturan integrasi WhatsApp berhasil disimpan!");
+    } catch (error) {
+      console.error("Gagal menyimpan data WA:", error);
+      alert("Gagal menyimpan pengaturan WhatsApp!");
+    } finally {
+      setIsWaSaving(false);
+    }
   };
 
-  const handleApiSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert("API token Insforge berhasil diperbarui!");
-  };
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -79,7 +107,7 @@ export default function SettingsPage() {
       <main className="flex-1 p-6 space-y-6 bg-muted/20">
         <div>
           <h1 className="text-2xl font-bold font-heading text-primary">Pengaturan Sistem</h1>
-          <p className="text-muted-foreground text-sm font-sans">Konfigurasi profil admin, integrasi WhatsApp, dan kredensial API Insforge.</p>
+          <p className="text-muted-foreground text-sm font-sans">Konfigurasi profil admin dan integrasi WhatsApp.</p>
         </div>
 
         {/* Tab Navigation */}
@@ -97,13 +125,6 @@ export default function SettingsPage() {
               }`}
           >
             <Phone className="w-4 h-4" /> Integrasi WhatsApp
-          </button>
-          <button
-            onClick={() => setActiveTab("system")}
-            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-all ${activeTab === "system" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            <Terminal className="w-4 h-4" /> Endpoint & API
           </button>
         </div>
 
@@ -199,6 +220,7 @@ export default function SettingsPage() {
                       <Input
                         id="wa-phone"
                         value={waConfig.phone}
+                        disabled={isWaLoading}
                         onChange={(e) => setWaConfig({ ...waConfig, phone: e.target.value })}
                       />
                       <p className="text-xs text-muted-foreground">Contoh format: 6287737860657 (Menggunakan prefix kode negara 62 untuk Indonesia)</p>
@@ -227,51 +249,15 @@ export default function SettingsPage() {
                     </div>
                   </CardContent>
                   <CardFooter className="border-t px-6 py-4 flex justify-end">
-                    <Button type="submit" className="gap-2"><Save className="w-4 h-4" /> Simpan Pengaturan</Button>
+                    <Button type="submit" className="gap-2" disabled={isWaSaving || isWaLoading}>
+                      <Save className="w-4 h-4" /> {isWaSaving ? "Menyimpan..." : "Simpan Pengaturan"}
+                    </Button>
                   </CardFooter>
                 </Card>
               </form>
             )}
 
-            {activeTab === "system" && (
-              <form onSubmit={handleApiSave} className="space-y-6">
-                <Card className="shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-heading">Pengaturan API & Webhook (Insforge)</CardTitle>
-                    <CardDescription>Sinkronisasi data database dashboard panel Anda dengan server API Insforge.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4 font-sans">
-                    <div className="grid gap-2">
-                      <Label htmlFor="api-endpoint">Insforge API Target URL</Label>
-                      <Input
-                        id="api-endpoint"
-                        value={apiConfig.endpoint}
-                        onChange={(e) => setApiConfig({ ...apiConfig, endpoint: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="api-token">API Token / Secret Key</Label>
-                      <Input
-                        id="api-token"
-                        type="password"
-                        value={apiConfig.token}
-                        onChange={(e) => setApiConfig({ ...apiConfig, token: e.target.value })}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-lg p-3 text-xs mt-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <div>
-                        <span className="font-semibold">Status Sinkronisasi: {apiConfig.status}</span>
-                        <p className="text-[10px] text-emerald-700/80">Koneksi data server backend berhasil terverifikasi pada 2026-06-07 00:30 UTC.</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="border-t px-6 py-4 flex justify-end">
-                    <Button type="submit" className="gap-2"><Save className="w-4 h-4" /> Simpan API Token</Button>
-                  </CardFooter>
-                </Card>
-              </form>
-            )}
+
           </div>
 
           {/* Quick Info Box */}
@@ -289,10 +275,7 @@ export default function SettingsPage() {
                   <span>SSl Status</span>
                   <Badge className="bg-emerald-100 text-emerald-800 border-none text-[9px] hover:bg-emerald-100 py-0 px-2 font-normal h-4">Active</Badge>
                 </div>
-                <div className="flex justify-between py-1 border-b">
-                  <span>Insforge Version</span>
-                  <span className="font-semibold text-foreground">v4.8.2-LTS</span>
-                </div>
+
                 <div className="flex justify-between py-1">
                   <span>System Engine</span>
                   <span className="font-semibold text-foreground">Next.js 16 (Turbo)</span>

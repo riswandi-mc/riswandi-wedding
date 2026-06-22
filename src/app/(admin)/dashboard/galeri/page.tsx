@@ -19,8 +19,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Image as ImageIcon, Video, UploadCloud, Pencil, Trash2, Plus, Search, Loader2 } from "lucide-react";
-import { insforge } from "@/lib/insforge/client";
-import { uploadMediaAdmin } from "./uploadAction";
 
 type MediaItem = {
   id: number;
@@ -49,16 +47,8 @@ export default function GaleriUploadPage() {
 
   const fetchMedia = async () => {
     setIsLoading(true);
-    const { data, error } = await insforge.database
-      .from("galeri")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching media:", error);
-    } else {
-      setMediaList(data || []);
-    }
+    // Insforge removed, using empty array
+    setMediaList([]);
     setIsLoading(false);
   };
 
@@ -77,46 +67,17 @@ export default function GaleriUploadPage() {
     setIsUploading(true);
 
     try {
-      // Generate random file name to prevent collision
-      const fileExt = selectedFile.name.split(".").pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `${newMedia.category}/${fileName}`;
+      // Mock upload
+      const mockMedia: MediaItem = {
+        id: Math.floor(Math.random() * 10000),
+        title: newMedia.title || "Untitled",
+        category: newMedia.category,
+        type: newMedia.type,
+        url: URL.createObjectURL(selectedFile),
+        key: selectedFile.name
+      };
 
-      // Upload file to InsForge storage using Server Action to bypass permission issues
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("fileName", filePath);
-
-      const uploadResult = await uploadMediaAdmin(formData);
-
-      if (uploadResult.error) {
-        throw new Error(uploadResult.error);
-      }
-
-      const uploadData = uploadResult.data;
-      if (!uploadData) throw new Error("Upload failed");
-
-      const publicUrl = insforge.storage
-        .from("galeri")
-        .getPublicUrl(filePath);
-
-      const { data: insertData, error: insertError } = await insforge.database
-        .from("galeri")
-        .insert([{
-          title: newMedia.title || "Untitled",
-          category: newMedia.category,
-          type: newMedia.type,
-          url: publicUrl,
-          key: uploadData.key || filePath,
-          size: uploadData.size || selectedFile.size
-        }])
-        .select();
-
-      if (insertError) throw insertError;
-
-      if (insertData && insertData.length > 0) {
-        setMediaList([insertData[0], ...mediaList]);
-      }
+      setMediaList([mockMedia, ...mediaList]);
       
       setIsAddOpen(false);
       setNewMedia({ title: "", category: "Wedding", type: "image" });
@@ -132,20 +93,6 @@ export default function GaleriUploadPage() {
   const handleDelete = async (id: number, key?: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus media ini dari galeri?")) {
       try {
-        if (key) {
-          const { error: storageError } = await insforge.storage
-            .from("galeri")
-            .remove(key);
-          if (storageError) throw storageError;
-        }
-
-        const { error: dbError } = await insforge.database
-          .from("galeri")
-          .delete()
-          .eq("id", id);
-          
-        if (dbError) throw dbError;
-
         setMediaList(mediaList.filter(item => item.id !== id));
       } catch (error) {
         console.error("Error deleting media:", error);

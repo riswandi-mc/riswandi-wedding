@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
+import { auth } from "@/lib/firebase"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,23 +37,37 @@ export function LoginForm({
     setLoading(true)
 
     try {
-      const res = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      })
+      await signInWithEmailAndPassword(auth, email, password)
 
-      if (!res.ok) {
-        const body = await res.json()
-        setError(body.message || "Email atau password salah")
-        setLoading(false)
-        return
-      }
-
+      // Berhasil login
       router.push("/dashboard")
       router.refresh()
-    } catch {
-      setError("Terjadi kesalahan jaringan. Coba lagi.")
+    } catch (error: any) {
+      console.error("Login Error:", error)
+      
+      // Auto-create admin if credential is invalid (which might mean user doesn't exist yet)
+      if (error.code === 'auth/invalid-credential' && email === 'azzamazhari.dev@gmail.com') {
+        try {
+          await createUserWithEmailAndPassword(auth, email, password)
+          router.push("/dashboard")
+          router.refresh()
+          return
+        } catch (createError: any) {
+          console.error("Create Admin Error:", createError)
+          // If email is already in use, it means the password was actually wrong
+          if (createError.code === 'auth/email-already-in-use') {
+             setError("Email atau password salah.")
+             setLoading(false)
+             return
+          }
+        }
+      }
+
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        setError("Email atau password salah.")
+      } else {
+        setError("Terjadi kesalahan saat login. Coba lagi.")
+      }
       setLoading(false)
     }
   }

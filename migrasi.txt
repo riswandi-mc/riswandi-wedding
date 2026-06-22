@@ -1,0 +1,3 @@
+
+
+3. Coba terapkan, saya sudah membuat firestore dengan production mode, coba buat collections no-whatsapp atau noWa dan pada collection tersebut buat document dengan key "nomer" dan value berupa nomer hp, dan buat Konfigurasi Pengalihan WhatsApp dengan default utama 6287737860657, yang fungsinya nanti nomor bisa di ubah dan disimpan ke firestore.

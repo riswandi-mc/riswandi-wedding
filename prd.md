@@ -156,7 +156,12 @@ Q&A accordion untuk pertanyaan umum:
 
 ## 5. Spesifikasi Teknis
 
-AspekKeputusanStack FrontendNext.js atau React (direkomendasikan untuk handling API & state modal form)Backend & Admin PanelInsforge (sebagai headless CMS/Backend & Dashboard Admin)Integrasi DataREST API POST request ke endpoint Insforge saat form submitAlur WhatsAppFrontend membuat URL-encoded string dan mengeksekusi window.location.href = wa.me/628... pada status API 200 OK
+| Aspek | Keputusan |
+|---|---|
+| Stack Frontend | Next.js atau React (direkomendasikan untuk handling API & state modal form) |
+| Backend & Admin Panel | (Menunggu Keputusan Pengganti) |
+| Integrasi Data | REST API POST request ke endpoint backend saat form submit |
+| Alur WhatsApp | Frontend membuat URL-encoded string dan mengeksekusi window.location.href = wa.me/628... |
 
 ## 6. KPI Sukses
 
@@ -181,20 +186,6 @@ AspekKeputusanStack FrontendNext.js atau React (direkomendasikan untuk handling 
 
 ---
 
-## 8. Spesifikasi Backend & Dashboard Admin (Insforge)Section ini mengatur konfigurasi backend menggunakan Insforge untuk memonitor trafik pemesanan secara terpusat sebelum user melanjutkan percakapan di WhatsApp.8.1 Konfigurasi Endpoint APIActionEndpointMethodTriggerResponse FrontendBooking MC/api/insforge/booking-mcPOSTKlik "Lanjut ke WA" pada modal layanan MCSimpan data $\rightarrow$ Redirect WAPesan Undangan/api/insforge/order-invitationPOSTKlik "Lanjut ke WA" pada modal UndanganSimpan data $\rightarrow$ Redirect WA8.2 Struktur Dashboard Admin (Insforge)Dashboard Insforge akan dikonfigurasi untuk menampilkan dua menu utama (Tabel/Collection):A. Menu: Data Booking MCTabel ini merekam semua leads yang tertarik menggunakan jasa MC.Kolom yang ditampilkan:ID Booking (Auto-generate)Tanggal Submit (Timestamp)Nama Klien (String)Layanan MC (Enum/Dropdown: All Event, Partner, Private)Tanggal Acara (Date)Status Follow-up (Default: Pending | Pilihan: Pending, Followed Up, Closed/Deal, Canceled)B. Menu: Data Pesanan UndanganTabel ini merekam leads spesifik untuk produk undangan digital.Kolom yang ditampilkan:ID Pesanan (Auto-generate)Tanggal Submit (Timestamp)Nama Mempelai (String)Template Dipilih (String/ID Template)Tanggal Akad/Resepsi (Date)Status Pembuatan (Default: New | Pilihan: New, In Progress, Review, Selesai)8.3 Skema Alur Logika (Frontend $\rightarrow$ Insforge $\rightarrow$ WhatsApp)Plaintext[User input data di Modal] 
-       ↓ 
-[Klik "Lanjut via WhatsApp"] 
-       ↓ 
-(Sistem Frontend Memproses API) 
-       ├─ [Mengirim JSON Payload ke Insforge] 
-       │       ↳ Insforge insert baris baru di Dashboard Admin 
-       ↓ 
-(Menunggu Response 200/Success dari Insforge) 
-       ↓ 
-[Frontend generate URL WA API & eksekusi Redirect] 
-       ↓ 
-[Aplikasi WhatsApp Terbuka dengan pesan Pre-filled]
-Buat skema database InsforgeRancang payload JSON APIDesain UI copy form modal
 
 
 menu pada dashboard admin

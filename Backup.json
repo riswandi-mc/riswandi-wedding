@@ -1,0 +1,48 @@
+{
+  "whatsappNumber": "6287737860657",
+  "services": [
+    {
+      "name": "MC All Event",
+      "description": "Ulang tahun, wisuda, corporate, gathering, dan lainnya.",
+      "features": [
+        "Penguasaan audiens berbagai kalangan",
+        "Ice breaking interaktif & seru",
+        "Fleksibilitas tema acara & durasi"
+      ]
+    },
+    {
+      "name": "MC Wedding Partner",
+      "description": "Paket berdua / duo MC untuk interaksi yang lebih hidup.",
+      "features": [
+        "2 MC Profesional (Pria & Wanita)",
+        "Chemistry & tektokan asik di panggung",
+        "Sangat cocok untuk resepsi berskala besar"
+      ]
+    },
+    {
+      "name": "MC Wedding Private",
+      "description": "MC tunggal eksklusif dengan sentuhan personal & elegan.",
+      "features": [
+        "Konsep intimate & hangat",
+        "Bantuan penyusunan rundown detail",
+        "Standby dari mulai akad hingga selesai"
+      ]
+    }
+  ],
+  "undanganTemplates": [
+    { "id": 1, "name": "Undangan 1 (Soft & Romantis)", "demo": "https://azzam-azhari.github.io/wedding-invitation/", "price": "Rp 39.000", "imgSig": 101 },
+    { "id": 2, "name": "Undangan 2 (Modern / Aesthetic Dark)", "demo": "#", "price": "Rp 39.000", "imgSig": 102, "onProcess": true },
+    { "id": 3, "name": "Undangan 3 (Fresh & Premium)", "demo": "https://ngodingsolusi.github.io/the-wedding-of-rehan-maulidan/", "price": "Rp 39.000", "imgSig": 103 },
+    { "id": 4, "name": "Undangan 4 (Minimalis & Elegan)", "demo": "https://invitation.sakeenah.site/", "price": "Rp 39.000", "imgSig": 104 },
+    { "id": 5, "name": "Undangan 5 (Floral / Botanical)", "demo": "https://undangan-digital-pied.vercel.app/", "price": "Rp 39.000", "imgSig": 105 },
+    { "id": 6, "name": "Undangan 6 (Klasik & Clean)", "demo": "https://undangan-pernikahan-online.netlify.app/", "price": "Rp 39.000", "imgSig": 106 },
+    { "id": 7, "name": "Undangan 7 (Stylish & Luxury)", "demo": "https://t-faces.github.io/The-wedding-of-Ari-dan-Nisa/", "price": "Rp 39.000", "imgSig": 107 },
+    { "id": 8, "name": "Undangan 8 (Exclusive & Smooth Animation)", "demo": "https://alystrastudio.github.io/Love-in-Motion/", "price": "Rp 39.000", "imgSig": 108 }
+  ],
+  "testimonials": [
+    { "name": "Sarah & Dimas", "event": "Wedding", "text": "Kak Riswandi MC yang luar biasa! Acara jadi hidup, tidak kaku, dan tamu pada betah. Rekomen banget buat yang mau nikah!" },
+    { "name": "PT. Maju Mundur", "event": "Corporate Gathering", "text": "Bisa mencairkan suasana dengan cepat. Ice breakingnya fresh dan bikin semua karyawan ketawa lepas. Top!" },
+    { "name": "Anita", "event": "Sweet Seventeen", "text": "Acara ulang tahunku jadi super seru berkat MC Riswandi. Temen-temen bilang acaranya pecah banget." },
+    { "name": "Budi & Rina", "event": "Wedding", "text": "Undangan digitalnya elegan dan proses pembuatannya cepat. MC-nya juga on time dan sangat profesional. Perfect!" }
+  ]
+}

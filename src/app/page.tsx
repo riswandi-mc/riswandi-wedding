@@ -18,9 +18,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { insforge } from "@/lib/insforge/client";
-
-const WA_NUMBER = "6287737860657"; // Updated with real number
+import { doc, getDoc, addDoc, collection, Timestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const undanganTemplates = [
   { id: 1, name: "Undangan 1 (Soft & Romantis)", demo: "https://azzam-azhari.github.io/wedding-invitation/", price: "Rp 39.000", imgSig: 101 },
@@ -39,17 +38,31 @@ export default function Home() {
 
   // Modal States
   const [isMCOpen, setIsMCOpen] = useState(false);
-  const [mcForm, setMcForm] = useState({ nama: "", tanggal: "", layanan: "" });
+  const [mcForm, setMcForm] = useState<{ nama: string; tanggal: Date | undefined; layanan: string }>({ nama: "", tanggal: undefined, layanan: "" });
+  const [isMCSubmitting, setIsMCSubmitting] = useState(false);
 
   // Galeri State
   const [galeriMedia, setGaleriMedia] = useState<any[]>([]);
 
+  const [waNumber, setWaNumber] = useState("6287737860657");
+
   useEffect(() => {
-    const fetchGaleri = async () => {
-      const { data } = await insforge.database.from("galeri").select("*").order("created_at", { ascending: false }).limit(6);
-      if (data) setGaleriMedia(data);
+    const fetchWaNumber = async () => {
+      try {
+        const docRef = doc(db, "noWa", "nomer");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.nomer) setWaNumber(data.nomer);
+        }
+      } catch (error) {
+        console.error("Gagal mengambil nomor WA:", error);
+      }
     };
-    fetchGaleri();
+    fetchWaNumber();
+
+    // Insforge has been removed. Data fetching is disabled for now.
+    setGaleriMedia([]);
   }, []);
 
   const [isUndanganOpen, setIsUndanganOpen] = useState(false);
@@ -71,14 +84,34 @@ export default function Home() {
   });
 
   const handleMCOpen = (layanan: string) => {
-    setMcForm({ nama: "", tanggal: "", layanan });
+    setMcForm({ nama: "", tanggal: undefined, layanan });
     setIsMCOpen(true);
   };
 
-  const handleMCSubmit = () => {
-    const text = `Halo Kak Riswandi! 👋\nSaya tertarik dengan layanan ${mcForm.layanan}.\nNama saya: ${mcForm.nama}\nTanggal acara: ${mcForm.tanggal}\nMohon info lebih lanjut ya, terima kasih 🙏`;
-    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
-    setIsMCOpen(false);
+  const handleMCSubmit = async () => {
+    if (!mcForm.nama || !mcForm.tanggal || !mcForm.layanan) {
+      alert("Mohon lengkapi semua data terlebih dahulu.");
+      return;
+    }
+    setIsMCSubmitting(true);
+    try {
+      const formattedDate = format(mcForm.tanggal, "dd MMMM yyyy", { locale: id });
+      await addDoc(collection(db, "bookingMC"), {
+        clientName: mcForm.nama,
+        date: formattedDate,
+        service: mcForm.layanan,
+        status: "Pending",
+        createdAt: Timestamp.now(),
+      });
+      alert("Booking berhasil dikirim! 🎉\nTim kami akan segera menghubungi Anda.");
+      setIsMCOpen(false);
+      setMcForm({ nama: "", tanggal: undefined, layanan: "" });
+    } catch (error) {
+      console.error("Gagal menyimpan booking:", error);
+      alert("Maaf, terjadi kesalahan saat mengirim booking. Silakan coba lagi.");
+    } finally {
+      setIsMCSubmitting(false);
+    }
   };
 
   const handleUndanganOpen = (templateName: string = "") => {
@@ -93,35 +126,45 @@ export default function Home() {
   };
 
   const handleUndanganSubmit = async () => {
+    if (!undanganForm.namaMempelai || !undanganForm.tanggal || !undanganForm.lokasi || !undanganForm.template) {
+      alert("Mohon lengkapi data wajib (Nama, Tanggal, Lokasi, Template) terlebih dahulu.");
+      return;
+    }
     setIsSubmitting(true);
-    const formattedTanggal = undanganForm.tanggal ? format(undanganForm.tanggal, "dd MMMM yyyy", { locale: id }) : "-";
+    const formattedTanggal = format(undanganForm.tanggal, "dd MMMM yyyy", { locale: id });
     const formattedTanggalTarget = undanganForm.tanggalTarget ? format(undanganForm.tanggalTarget, "dd MMMM yyyy", { locale: id }) : "-";
 
     const text = `Halo Kak Riswandi! 👋\nSaya ingin memesan Undangan Pernikahan Digital.\n\n📋 Detail Pesanan:\n- Nama Mempelai : ${undanganForm.namaMempelai}\n- Tanggal Acara : ${formattedTanggal}\n- Target Jadi Undangan : ${formattedTanggalTarget}\n- Lokasi Acara  : ${undanganForm.lokasi}\n- Template      : ${undanganForm.template}\n\nSaya sudah memahami ketentuan pemesanan minimal 7 hari sebelum acara.\nMohon konfirmasi ketersediaan dan harga ya, terima kasih! 🙏`;
 
     try {
-      const { error } = await insforge.database.from("pesanan_undangan").insert([{
+      await addDoc(collection(db, "pesananUndangan"), {
         couple_name: undanganForm.namaMempelai,
         template: undanganForm.template,
         date: formattedTanggal,
         target_date: formattedTanggalTarget,
         location: undanganForm.lokasi,
-        phone: "-",
-        status: "New"
-      }]);
+        phone: "",
+        status: "New",
+        createdAt: Timestamp.now(),
+      });
 
-      if (error) {
-        throw error;
-      }
+      setWaText(text);
+      setIsUndanganOpen(false);
+      setIsWAPopupOpen(true);
+      
+      setUndanganForm({
+        namaMempelai: "",
+        tanggal: undefined,
+        tanggalTarget: undefined,
+        lokasi: "",
+        template: "",
+      });
     } catch (error) {
-      console.error("Gagal menyimpan pesanan ke database:", error);
-      alert("Pesanan gagal tersimpan di sistem, namun Anda tetap bisa melanjutkan pesanan manual via WhatsApp.");
+      console.error("Gagal menyimpan pesanan undangan:", error);
+      alert("Maaf, terjadi kesalahan saat mengirim pesanan. Silakan coba lagi.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setWaText(text);
-    setIsSubmitting(false);
-    setIsUndanganOpen(false);
-    setIsWAPopupOpen(true);
   };
 
   return (
@@ -145,7 +188,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             {/* Desktop / Tablet CTA Button */}
             <Button asChild size="sm" className="hidden sm:inline-flex">
-              <a href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent("Halo Kak Riswandi! 👋\nSaya ingin konsultasi seputar layanan MC / Undangan Digital.")}`} target="_blank" rel="noopener noreferrer">
+              <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent("Halo Kak Riswandi! 👋\nSaya ingin konsultasi seputar layanan MC / Undangan Digital.")}`} target="_blank" rel="noopener noreferrer">
                 Hubungi Kami
               </a>
             </Button>
@@ -172,7 +215,7 @@ export default function Home() {
                 </div>
                 <div className="pt-6 border-t border-border mt-auto">
                   <Button asChild className="w-full" size="lg">
-                    <a href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent("Halo Kak Riswandi! 👋\nSaya ingin konsultasi seputar layanan MC / Undangan Digital.")}`} target="_blank" rel="noopener noreferrer">
+                    <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent("Halo Kak Riswandi! 👋\nSaya ingin konsultasi seputar layanan MC / Undangan Digital.")}`} target="_blank" rel="noopener noreferrer">
                       Hubungi Kami via WA
                     </a>
                   </Button>
@@ -578,7 +621,7 @@ export default function Home() {
             <div className="flex flex-col gap-4 text-white/60 text-[15px] font-sans">
               <div className="flex items-start gap-3">
                 <Phone className="h-5 w-5 mt-0.5 shrink-0" />
-                <span>+62 877-3786-0657</span>
+                <span>+{waNumber}</span>
               </div>
               <div className="flex items-start gap-3">
                 <Mail className="h-5 w-5 mt-0.5 shrink-0" />
@@ -602,7 +645,7 @@ export default function Home() {
 
       {/* Sticky WA CTA */}
       <a
-        href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent("Halo Kak Riswandi! 👋\nSaya ingin bertanya...")}`}
+        href={`https://wa.me/${waNumber}?text=${encodeURIComponent("Halo Kak Riswandi! 👋\nSaya ingin bertanya...")}`}
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-3.5 rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 group"
@@ -619,7 +662,7 @@ export default function Home() {
           <DialogHeader>
             <DialogTitle>Booking Layanan MC</DialogTitle>
             <DialogDescription>
-              Isi detail acara Anda. Kami akan mengarahkan Anda ke WhatsApp untuk konfirmasi ketersediaan jadwal.
+              Isi detail acara Anda. Data booking akan langsung tersimpan dan tim kami akan segera menghubungi Anda.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -633,13 +676,32 @@ export default function Home() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="tanggal-mc">Tanggal Acara</Label>
-              <Input
-                id="tanggal-mc"
-                placeholder="Cth: 12 Desember 2026"
-                value={mcForm.tanggal}
-                onChange={(e) => setMcForm({ ...mcForm, tanggal: e.target.value })}
-              />
+              <Label>Tanggal Acara</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal h-10 bg-background",
+                      !mcForm.tanggal && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                    {mcForm.tanggal ? (
+                      format(mcForm.tanggal, "dd MMMM yyyy", { locale: id })
+                    ) : (
+                      <span>Pilih tanggal acara</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 z-50 bg-background" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={mcForm.tanggal}
+                    onSelect={(date) => setMcForm({ ...mcForm, tanggal: date })}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="layanan-mc">Pilihan Layanan</Label>
@@ -656,8 +718,8 @@ export default function Home() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleMCSubmit} className="w-full flex items-center justify-center gap-2">
-              Lanjut ke WhatsApp <MessageCircle className="w-4 h-4" />
+            <Button onClick={handleMCSubmit} disabled={isMCSubmitting} className="w-full flex items-center justify-center gap-2">
+              {isMCSubmitting ? "Mengirim..." : "Booking Sekarang"} <CalendarIcon className="w-4 h-4" />
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -786,7 +848,7 @@ export default function Home() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsWAPopupOpen(false)}>Batal</Button>
             <Button onClick={() => {
-              window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waText)}`, "_blank");
+              window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}`, "_blank");
               setIsWAPopupOpen(false);
             }} className="flex items-center justify-center gap-2">
               Lanjut ke WhatsApp <MessageCircle className="w-4 h-4" />

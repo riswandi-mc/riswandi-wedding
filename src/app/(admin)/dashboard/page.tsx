@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,9 +14,26 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, FileSpreadsheet, Images, Settings, Users, Star, ArrowUpRight, MessageCircle } from "lucide-react";
+import { Calendar, FileSpreadsheet, Images, Star, ArrowUpRight, MessageCircle } from "lucide-react";
 
 export default function DashboardPage() {
+  const [waNumber, setWaNumber] = useState("6287737860657");
+
+  useEffect(() => {
+    const fetchWaNumber = async () => {
+      try {
+        const docRef = doc(db, "noWa", "WAUtama");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().nomer) {
+          setWaNumber(docSnap.data().nomer);
+        }
+      } catch (error) {
+        console.error("Gagal memuat nomor WA:", error);
+      }
+    };
+    fetchWaNumber();
+  }, []);
+
   // Mock recent activity data
   const [recentBookings] = useState([
     { id: "MC-1024", client: "Budi & Rina", date: "12 Des 2026", type: "MC Wedding Partner", status: "Deal" },
@@ -222,7 +241,7 @@ export default function DashboardPage() {
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <Button size="icon-sm" variant="ghost" asChild>
-                        <a href="https://wa.me/6287737860657" target="_blank" rel="noopener noreferrer" title="Hubungi via WA">
+                        <a href={`https://wa.me/${waNumber}?text=${encodeURIComponent("Halo Kak Riswandi! Saya ingin menanyakan terkait aktivitas terbaru di dashboard.")}`} target="_blank" rel="noopener noreferrer" title="Hubungi via WA">
                           <MessageCircle className="h-4 w-4 text-emerald-500" />
                         </a>
                       </Button>
