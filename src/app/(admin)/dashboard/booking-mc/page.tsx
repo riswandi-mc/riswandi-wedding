@@ -62,6 +62,7 @@ export default function BookingMCPage() {
     phone: "",
     status: "Pending",
   });
+  const [isDateOpen, setIsDateOpen] = useState(false);
 
   // Fetch bookings from Firestore in real-time
   useEffect(() => {
@@ -375,7 +376,7 @@ export default function BookingMCPage() {
             </div>
             <div className="grid gap-2">
               <Label>Tanggal Acara</Label>
-              <Popover>
+              <Popover open={isDateOpen} onOpenChange={setIsDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -396,7 +397,10 @@ export default function BookingMCPage() {
                   <Calendar
                     mode="single"
                     selected={newBooking.date}
-                    onSelect={(date) => setNewBooking({ ...newBooking, date })}
+                    onSelect={(date) => {
+                      setNewBooking({ ...newBooking, date });
+                      setIsDateOpen(false);
+                    }}
                   />
                 </PopoverContent>
               </Popover>

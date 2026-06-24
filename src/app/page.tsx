@@ -83,6 +83,10 @@ export default function Home() {
     template: "",
   });
 
+  const [mcDateOpen, setMcDateOpen] = useState(false);
+  const [undanganDateOpen, setUndanganDateOpen] = useState(false);
+  const [undanganTargetDateOpen, setUndanganTargetDateOpen] = useState(false);
+
   const handleMCOpen = (layanan: string) => {
     setMcForm({ nama: "", tanggal: undefined, layanan });
     setIsMCOpen(true);
@@ -677,7 +681,7 @@ export default function Home() {
             </div>
             <div className="grid gap-2">
               <Label>Tanggal Acara</Label>
-              <Popover>
+              <Popover open={mcDateOpen} onOpenChange={setMcDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -698,7 +702,10 @@ export default function Home() {
                   <Calendar
                     mode="single"
                     selected={mcForm.tanggal}
-                    onSelect={(date) => setMcForm({ ...mcForm, tanggal: date })}
+                    onSelect={(date) => {
+                      setMcForm({ ...mcForm, tanggal: date });
+                      setMcDateOpen(false);
+                    }}
                   />
                 </PopoverContent>
               </Popover>
@@ -746,7 +753,7 @@ export default function Home() {
             </div>
             <div className="grid gap-2">
               <Label>Tanggal Acara</Label>
-              <Popover>
+              <Popover open={undanganDateOpen} onOpenChange={setUndanganDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -767,14 +774,17 @@ export default function Home() {
                   <Calendar
                     mode="single"
                     selected={undanganForm.tanggal}
-                    onSelect={(date) => setUndanganForm({ ...undanganForm, tanggal: date })}
+                    onSelect={(date) => {
+                      setUndanganForm({ ...undanganForm, tanggal: date });
+                      setUndanganDateOpen(false);
+                    }}
                   />
                 </PopoverContent>
               </Popover>
             </div>
             <div className="grid gap-2">
               <Label>Tanggal Target Jadi Undangan</Label>
-              <Popover>
+              <Popover open={undanganTargetDateOpen} onOpenChange={setUndanganTargetDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -795,7 +805,10 @@ export default function Home() {
                   <Calendar
                     mode="single"
                     selected={undanganForm.tanggalTarget}
-                    onSelect={(date) => setUndanganForm({ ...undanganForm, tanggalTarget: date })}
+                    onSelect={(date) => {
+                      setUndanganForm({ ...undanganForm, tanggalTarget: date });
+                      setUndanganTargetDateOpen(false);
+                    }}
                   />
                 </PopoverContent>
               </Popover>

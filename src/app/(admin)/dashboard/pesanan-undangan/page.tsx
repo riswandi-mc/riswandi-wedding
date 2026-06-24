@@ -100,6 +100,8 @@ export default function PesananUndanganPage() {
     phone: "",
     status: "New",
   });
+  const [isDateOpen, setIsDateOpen] = useState(false);
+  const [isTargetDateOpen, setIsTargetDateOpen] = useState(false);
 
   const handleAddSubmit = async () => {
     if (!newOrder.couple_name || !newOrder.date || !newOrder.template) {
@@ -382,7 +384,7 @@ export default function PesananUndanganPage() {
             </div>
             <div className="grid gap-2">
               <Label>Tanggal Acara</Label>
-              <Popover>
+              <Popover open={isDateOpen} onOpenChange={setIsDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -403,14 +405,17 @@ export default function PesananUndanganPage() {
                   <Calendar
                     mode="single"
                     selected={newOrder.date}
-                    onSelect={(date) => setNewOrder({ ...newOrder, date })}
+                    onSelect={(date) => {
+                      setNewOrder({ ...newOrder, date });
+                      setIsDateOpen(false);
+                    }}
                   />
                 </PopoverContent>
               </Popover>
             </div>
             <div className="grid gap-2">
               <Label>Tanggal Target Selesai</Label>
-              <Popover>
+              <Popover open={isTargetDateOpen} onOpenChange={setIsTargetDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -431,7 +436,10 @@ export default function PesananUndanganPage() {
                   <Calendar
                     mode="single"
                     selected={newOrder.target_date}
-                    onSelect={(date) => setNewOrder({ ...newOrder, target_date: date })}
+                    onSelect={(date) => {
+                      setNewOrder({ ...newOrder, target_date: date });
+                      setIsTargetDateOpen(false);
+                    }}
                   />
                 </PopoverContent>
               </Popover>
