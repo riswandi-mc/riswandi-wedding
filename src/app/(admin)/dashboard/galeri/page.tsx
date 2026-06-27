@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import galeriData from "@/data/galeri.json";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -47,8 +48,13 @@ export default function GaleriUploadPage() {
 
   const fetchMedia = async () => {
     setIsLoading(true);
-    // Insforge removed, using empty array
-    setMediaList([]);
+    const localData = localStorage.getItem("dummyGaleri");
+    if (localData) {
+      setMediaList(JSON.parse(localData));
+    } else {
+      setMediaList(galeriData as MediaItem[]);
+      localStorage.setItem("dummyGaleri", JSON.stringify(galeriData));
+    }
     setIsLoading(false);
   };
 
@@ -77,7 +83,9 @@ export default function GaleriUploadPage() {
         key: selectedFile.name
       };
 
-      setMediaList([mockMedia, ...mediaList]);
+      const newMediaList = [mockMedia, ...mediaList];
+      setMediaList(newMediaList);
+      localStorage.setItem("dummyGaleri", JSON.stringify(newMediaList));
       
       setIsAddOpen(false);
       setNewMedia({ title: "", category: "Wedding", type: "image" });
@@ -93,7 +101,9 @@ export default function GaleriUploadPage() {
   const handleDelete = async (id: number, key?: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus media ini dari galeri?")) {
       try {
-        setMediaList(mediaList.filter(item => item.id !== id));
+        const newMediaList = mediaList.filter(item => item.id !== id);
+        setMediaList(newMediaList);
+        localStorage.setItem("dummyGaleri", JSON.stringify(newMediaList));
       } catch (error) {
         console.error("Error deleting media:", error);
         alert("Gagal menghapus media.");

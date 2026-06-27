@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import templatesData from "@/data/templates.json";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,21 +29,20 @@ type Template = {
   onProcess?: boolean;
 };
 
-const initialTemplates: Template[] = [
-  { id: 1, name: "Undangan 1 (Soft & Romantis)", demo: "https://azzam-azhari.github.io/wedding-invitation/", price: "Rp 39.000", imgSig: 101 },
-  { id: 2, name: "Undangan 2 (Modern / Aesthetic Dark)", demo: "#", price: "Rp 39.000", imgSig: 102, onProcess: true },
-  { id: 3, name: "Undangan 3 (Fresh & Premium)", demo: "https://ngodingsolusi.github.io/the-wedding-of-rehan-maulidan/", price: "Rp 39.000", imgSig: 103 },
-  { id: 4, name: "Undangan 4 (Minimalis & Elegan)", demo: "https://invitation.sakeenah.site/", price: "Rp 39.000", imgSig: 104 },
-  { id: 5, name: "Undangan 5 (Floral / Botanical)", demo: "https://undangan-digital-pied.vercel.app/", price: "Rp 39.000", imgSig: 105 },
-  { id: 6, name: "Undangan 6 (Klasik & Clean)", demo: "https://undangan-pernikahan-online.netlify.app/", price: "Rp 39.000", imgSig: 106 },
-  { id: 7, name: "Undangan 7 (Stylish & Luxury)", demo: "https://t-faces.github.io/The-wedding-of-Ari-dan-Nisa/", price: "Rp 39.000", imgSig: 107 },
-  { id: 8, name: "Undangan 8 (Exclusive & Smooth Animation)", demo: "https://alystrastudio.github.io/Love-in-Motion/", price: "Rp 39.000", imgSig: 108 },
-];
-
 export default function TemplateUndanganPage() {
-  const [templates, setTemplates] = useState<Template[]>(initialTemplates);
+  const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  useEffect(() => {
+    const localData = localStorage.getItem("dummyTemplates");
+    if (localData) {
+      setTemplates(JSON.parse(localData));
+    } else {
+      setTemplates(templatesData as Template[]);
+      localStorage.setItem("dummyTemplates", JSON.stringify(templatesData));
+    }
+  }, []);
 
   // Edit fields
   const [editForm, setEditForm] = useState({ name: "", price: "", demo: "", onProcess: false });
@@ -55,11 +55,13 @@ export default function TemplateUndanganPage() {
 
   const handleEditSubmit = () => {
     if (!selectedTemplate) return;
-    setTemplates(templates.map(t =>
+    const newTemplatesList = templates.map(t =>
       t.id === selectedTemplate.id
         ? { ...t, name: editForm.name, price: editForm.price, demo: editForm.demo, onProcess: editForm.onProcess }
         : t
-    ));
+    );
+    setTemplates(newTemplatesList);
+    localStorage.setItem("dummyTemplates", JSON.stringify(newTemplatesList));
     setIsEditOpen(false);
     setSelectedTemplate(null);
   };

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import faqsData from "@/data/faqs.json";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,16 +26,19 @@ type FAQ = {
   answer: string;
 };
 
-const initialFAQs: FAQ[] = [
-  { id: "faq-1", question: "Apakah bisa request lagu atau script MC?", answer: "Tentu saja! Kami sangat fleksibel dan akan menyesuaikan gaya, bahasa, serta script MC sesuai dengan tema dan preferensi acara Anda. Request lagu untuk backsound interaksi juga sangat diperbolehkan." },
-  { id: "faq-2", question: "Berapa jauh area jangkauan layanan MC?", answer: "Kami melayani wilayah Jabodetabek dan sekitarnya secara reguler. Untuk luar kota atau luar pulau, kami juga bersedia dengan tambahan biaya akomodasi & transportasi yang disepakati bersama." },
-  { id: "faq-3", question: "Apakah undangan digital bisa direvisi?", answer: "Ya, kami memberikan kesempatan revisi minor (seperti ubah teks, perubahan jam/tanggal, dan perbaikan typo) sebanyak maksimal 2 kali sebelum hari H acara." },
-  { id: "faq-4", question: "Bagaimana sistem pembayarannya?", answer: "Sistem pembayaran dilakukan dengan cara Transfer Bank. Diperlukan Down Payment (DP) minimal 30% untuk mengunci jadwal (booking tanggal). Pelunasan dapat dilakukan maksimal H-1 sebelum acara." },
-];
-
 export default function FAQPage() {
-  const [faqs, setFaqs] = useState<FAQ[]>(initialFAQs);
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const localData = localStorage.getItem("dummyFaqs");
+    if (localData) {
+      setFaqs(JSON.parse(localData));
+    } else {
+      setFaqs(faqsData as FAQ[]);
+      localStorage.setItem("dummyFaqs", JSON.stringify(faqsData));
+    }
+  }, []);
 
   // Dialog State
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -46,7 +50,9 @@ export default function FAQPage() {
 
   const handleAddSubmit = () => {
     const id = `faq-${Date.now()}`;
-    setFaqs([...faqs, { id, ...newFAQ }]);
+    const newFaqsList = [...faqs, { id, ...newFAQ }];
+    setFaqs(newFaqsList);
+    localStorage.setItem("dummyFaqs", JSON.stringify(newFaqsList));
     setIsAddOpen(false);
     setNewFAQ({ question: "", answer: "" });
   };
@@ -59,14 +65,18 @@ export default function FAQPage() {
 
   const handleEditSubmit = () => {
     if (!selectedFAQ) return;
-    setFaqs(faqs.map(f => f.id === selectedFAQ.id ? { ...f, question: editForm.question, answer: editForm.answer } : f));
+    const newFaqsList = faqs.map(f => f.id === selectedFAQ.id ? { ...f, question: editForm.question, answer: editForm.answer } : f);
+    setFaqs(newFaqsList);
+    localStorage.setItem("dummyFaqs", JSON.stringify(newFaqsList));
     setIsEditOpen(false);
     setSelectedFAQ(null);
   };
 
   const handleDelete = (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus FAQ ini?")) {
-      setFaqs(faqs.filter(f => f.id !== id));
+      const newFaqsList = faqs.filter(f => f.id !== id);
+      setFaqs(newFaqsList);
+      localStorage.setItem("dummyFaqs", JSON.stringify(newFaqsList));
     }
   };
 

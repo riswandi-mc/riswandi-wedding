@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, Timestamp, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import ordersData from "@/data/orders.json";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
@@ -48,36 +47,16 @@ export default function PesananUndanganPage() {
   const [templateFilter, setTemplateFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Fetch orders from Firestore in real-time
+  // Fetch orders from local state/storage
   useEffect(() => {
-    const q = query(collection(db, "pesananUndangan"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const data: Order[] = snapshot.docs.map((docSnap) => {
-          const d = docSnap.data();
-          return {
-            id: docSnap.id,
-            couple_name: d.couple_name || "",
-            template: d.template || "",
-            date: d.date || "",
-            target_date: d.target_date || "",
-            location: d.location || "",
-            phone: d.phone || "",
-            status: d.status || "New",
-            createdAt: d.createdAt,
-          };
-        });
-        setOrders(data);
-        setIsLoading(false);
-      },
-      (error) => {
-        console.error("Gagal mengambil data pesanan:", error);
-        setIsLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
+    const localData = localStorage.getItem("dummyOrders");
+    if (localData) {
+      setOrders(JSON.parse(localData));
+    } else {
+      setOrders(ordersData as Order[]);
+      localStorage.setItem("dummyOrders", JSON.stringify(ordersData));
+    }
+    setIsLoading(false);
   }, []);
 
   // Add Order Modal States
@@ -113,7 +92,8 @@ export default function PesananUndanganPage() {
       const formattedDate = format(newOrder.date, "dd MMMM yyyy", { locale: localeId });
       const formattedTargetDate = newOrder.target_date ? format(newOrder.target_date, "dd MMMM yyyy", { locale: localeId }) : "-";
       
-      await addDoc(collection(db, "pesananUndangan"), {
+      const addedOrder: Order = {
+        id: `INV-${Date.now()}`,
         couple_name: newOrder.couple_name,
         template: newOrder.template,
         date: formattedDate,
@@ -121,8 +101,13 @@ export default function PesananUndanganPage() {
         location: newOrder.location,
         phone: newOrder.phone || "",
         status: newOrder.status,
-        createdAt: Timestamp.now(),
-      });
+        createdAt: new Date().toISOString(),
+      };
+      
+      const newOrdersList = [addedOrder, ...orders];
+      setOrders(newOrdersList);
+      localStorage.setItem("dummyOrders", JSON.stringify(newOrdersList));
+
       setIsAddOpen(false);
       setNewOrder({ couple_name: "", template: "Undangan 1 (Soft & Romantis)", date: undefined, target_date: undefined, location: "", phone: "", status: "New" });
     } catch (error) {
@@ -135,7 +120,9 @@ export default function PesananUndanganPage() {
 
   const handleStatusChange = async (id: string, newStatus: Order["status"]) => {
     try {
-      await updateDoc(doc(db, "pesananUndangan", id), { status: newStatus });
+      const updatedOrders = orders.map(o => o.id === id ? { ...o, status: newStatus } : o);
+      setOrders(updatedOrders);
+      localStorage.setItem("dummyOrders", JSON.stringify(updatedOrders));
     } catch (error) {
       console.error("Gagal mengubah status:", error);
       alert("Gagal mengubah status pesanan.");
@@ -145,7 +132,9 @@ export default function PesananUndanganPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus data pesanan ini?")) {
       try {
-        await deleteDoc(doc(db, "pesananUndangan", id));
+        const remainingOrders = orders.filter(o => o.id !== id);
+        setOrders(remainingOrders);
+        localStorage.setItem("dummyOrders", JSON.stringify(remainingOrders));
       } catch (error) {
         console.error("Gagal menghapus pesanan:", error);
         alert("Gagal menghapus data pesanan.");

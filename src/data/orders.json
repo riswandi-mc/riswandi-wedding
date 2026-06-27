@@ -1,0 +1,35 @@
+[
+  {
+    "id": "INV-5091",
+    "couple_name": "Sarah & Dimas",
+    "template": "Undangan 1 (Soft & Romantis)",
+    "date": "24 Oktober 2026",
+    "target_date": "01 Oktober 2026",
+    "location": "Gedung Serbaguna Jakarta",
+    "phone": "6281234567890",
+    "status": "In Progress",
+    "createdAt": "2026-06-01T10:00:00Z"
+  },
+  {
+    "id": "INV-5090",
+    "couple_name": "Rian & Mita",
+    "template": "Undangan 3 (Fresh & Premium)",
+    "date": "05 November 2026",
+    "target_date": "15 Oktober 2026",
+    "location": "Hotel Mulia Senayan",
+    "phone": "6281234567891",
+    "status": "Selesai",
+    "createdAt": "2026-05-20T11:30:00Z"
+  },
+  {
+    "id": "INV-5092",
+    "couple_name": "Andi & Siska",
+    "template": "Undangan 4 (Minimalis & Elegan)",
+    "date": "12 Desember 2026",
+    "target_date": "12 November 2026",
+    "location": "Bandung",
+    "phone": "6281234567892",
+    "status": "New",
+    "createdAt": "2026-06-10T09:15:00Z"
+  }
+]

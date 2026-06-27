@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
   SidebarInset,
@@ -9,9 +10,25 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  return <DashboardLayoutInner>{children}</DashboardLayoutInner>
+}
+
+async function DashboardLayoutInner({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const { profile } = await requireAdmin()
+
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar
+        user={{
+          name: profile.full_name || "Admin",
+          email: profile.email,
+          avatar: "/avatars/shadcn.jpg",
+        }}
+      />
       <SidebarInset>
         {children}
       </SidebarInset>

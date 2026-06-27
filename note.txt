@@ -5,3 +5,9 @@ email azzamazhari.dev@gmail.com dan password @Dmin123
 padil@gmail.com - admin123
 azzam@gmail.com - admin123
 admin@gmail.com - admin123
+
+cd "D:\Website\Jasa WEB Wedding\riswandi-wedding"
+$env:SUPABASE_ADMIN_EMAIL='owner@riswandi-wedding.local'
+$env:SUPABASE_ADMIN_PASSWORD='8uhrSso$ZV6UCzXY*@Wu'
+$env:SUPABASE_ADMIN_FULL_NAME='Riswandi Wedding Owner'
+node scripts/supabase-phase1-baseline.mjs

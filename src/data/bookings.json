@@ -1,0 +1,29 @@
+[
+  {
+    "id": "MC-1024",
+    "clientName": "Budi & Rina",
+    "date": "12 Desember 2026",
+    "service": "MC Wedding Partner",
+    "phone": "6281234567890",
+    "status": "Deal",
+    "createdAt": "2026-06-01T10:00:00Z"
+  },
+  {
+    "id": "MC-1025",
+    "clientName": "PT. Maju Mundur",
+    "date": "18 November 2026",
+    "service": "MC All Event",
+    "phone": "6281234567891",
+    "status": "Followed Up",
+    "createdAt": "2026-06-02T11:30:00Z"
+  },
+  {
+    "id": "MC-1026",
+    "clientName": "Sarah & Dimas",
+    "date": "24 Oktober 2026",
+    "service": "MC Wedding Private",
+    "phone": "6281234567892",
+    "status": "Pending",
+    "createdAt": "2026-06-05T09:15:00Z"
+  }
+]

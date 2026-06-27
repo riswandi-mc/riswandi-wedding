@@ -1,6 +1,7 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useTransition } from "react"
+import { logout } from "@/app/actions/auth"
 import {
   Avatar,
   AvatarFallback,
@@ -9,7 +10,6 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -21,7 +21,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react"
 
 export function NavUser({
   user,
@@ -33,21 +33,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const router = useRouter()
-
-  const handleLogout = async () => {
-    try {
-      await fetch("/api/auth/sign-out", { method: "POST" })
-    } catch (err) {
-      console.error(err)
-    }
-
-    if (typeof window !== "undefined") {
-      window.localStorage.clear()
-      window.sessionStorage.clear()
-      window.location.href = "/login"
-    }
-  }
+  const [isPending, startTransition] = useTransition()
 
   return (
     <SidebarMenu>
@@ -89,9 +75,16 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem
+              disabled={isPending}
+              onClick={() => {
+                startTransition(async () => {
+                  await logout()
+                })
+              }}
+            >
               <LogOutIcon />
-              Log out
+              {isPending ? "Logging out..." : "Log out"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

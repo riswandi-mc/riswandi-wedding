@@ -1,0 +1,10 @@
+{
+  "phone": "6287737860657",
+  "mcTemplate": "Halo Kak Riswandi! 👋\nSaya tertarik dengan layanan [layanan].\nNama saya: [nama]\nTanggal acara: [tanggal]\nMohon info lebih lanjut ya, terima kasih 🙏",
+  "invitationTemplate": "Halo Kak Riswandi! 👋\nSaya ingin memesan Undangan Pernikahan Digital.\n\n📋 Detail Pesanan:\n- Nama Mempelai : [namaMempelai]\n- Tanggal Acara : [tanggal]\n- Lokasi Acara  : [lokasi]\n- Template      : [template]\n\nMohon konfirmasi ketersediaan ya, terima kasih! 🙏",
+  "admin": {
+    "name": "Admin Riswandi",
+    "email": "admin@gmail.com",
+    "role": "Super Administrator"
+  }
+}

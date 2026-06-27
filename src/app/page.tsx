@@ -18,19 +18,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { doc, getDoc, addDoc, collection, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import settingsData from "@/data/settings.json";
+import templatesData from "@/data/templates.json";
+import testimonialsData from "@/data/testimonials.json";
+import galeriData from "@/data/galeri.json";
 
-const undanganTemplates = [
-  { id: 1, name: "Undangan 1 (Soft & Romantis)", demo: "https://azzam-azhari.github.io/wedding-invitation/", price: "Rp 39.000", imgSig: 101 },
-  { id: 2, name: "Undangan 2 (Modern / Aesthetic Dark)", demo: "#", price: "Rp 39.000", imgSig: 102, onProcess: true },
-  { id: 3, name: "Undangan 3 (Fresh & Premium)", demo: "https://ngodingsolusi.github.io/the-wedding-of-rehan-maulidan/", price: "Rp 39.000", imgSig: 103 },
-  { id: 4, name: "Undangan 4 (Minimalis & Elegan)", demo: "https://invitation.sakeenah.site/", price: "Rp 39.000", imgSig: 104 },
-  { id: 5, name: "Undangan 5 (Floral / Botanical)", demo: "https://undangan-digital-pied.vercel.app/", price: "Rp 39.000", imgSig: 105 },
-  { id: 6, name: "Undangan 6 (Klasik & Clean)", demo: "https://undangan-pernikahan-online.netlify.app/", price: "Rp 39.000", imgSig: 106 },
-  { id: 7, name: "Undangan 7 (Stylish & Luxury)", demo: "https://t-faces.github.io/The-wedding-of-Ari-dan-Nisa/", price: "Rp 39.000", imgSig: 107 },
-  { id: 8, name: "Undangan 8 (Exclusive & Smooth Animation)", demo: "https://alystrastudio.github.io/Love-in-Motion/", price: "Rp 39.000", imgSig: 108 },
-];
+const undanganTemplates = templatesData;
 
 export default function Home() {
   // Navigation State
@@ -42,28 +35,9 @@ export default function Home() {
   const [isMCSubmitting, setIsMCSubmitting] = useState(false);
 
   // Galeri State
-  const [galeriMedia, setGaleriMedia] = useState<any[]>([]);
+  const [galeriMedia, setGaleriMedia] = useState<any[]>(galeriData);
 
-  const [waNumber, setWaNumber] = useState("6287737860657");
-
-  useEffect(() => {
-    const fetchWaNumber = async () => {
-      try {
-        const docRef = doc(db, "noWa", "nomer");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.nomer) setWaNumber(data.nomer);
-        }
-      } catch (error) {
-        console.error("Gagal mengambil nomor WA:", error);
-      }
-    };
-    fetchWaNumber();
-
-    // Insforge has been removed. Data fetching is disabled for now.
-    setGaleriMedia([]);
-  }, []);
+  const [waNumber, setWaNumber] = useState(settingsData.phone);
 
   const [isUndanganOpen, setIsUndanganOpen] = useState(false);
   const [isWAPopupOpen, setIsWAPopupOpen] = useState(false);
@@ -100,13 +74,19 @@ export default function Home() {
     setIsMCSubmitting(true);
     try {
       const formattedDate = format(mcForm.tanggal, "dd MMMM yyyy", { locale: id });
-      await addDoc(collection(db, "bookingMC"), {
+      
+      const newBooking = {
+        id: `MC-${Date.now()}`,
         clientName: mcForm.nama,
         date: formattedDate,
         service: mcForm.layanan,
+        phone: "",
         status: "Pending",
-        createdAt: Timestamp.now(),
-      });
+        createdAt: new Date().toISOString(),
+      };
+      const existingBookings = JSON.parse(localStorage.getItem("dummyBookings") || "[]");
+      localStorage.setItem("dummyBookings", JSON.stringify([...existingBookings, newBooking]));
+
       alert("Booking berhasil dikirim! 🎉\nTim kami akan segera menghubungi Anda.");
       setIsMCOpen(false);
       setMcForm({ nama: "", tanggal: undefined, layanan: "" });
@@ -141,7 +121,8 @@ export default function Home() {
     const text = `Halo Kak Riswandi! 👋\nSaya ingin memesan Undangan Pernikahan Digital.\n\n📋 Detail Pesanan:\n- Nama Mempelai : ${undanganForm.namaMempelai}\n- Tanggal Acara : ${formattedTanggal}\n- Target Jadi Undangan : ${formattedTanggalTarget}\n- Lokasi Acara  : ${undanganForm.lokasi}\n- Template      : ${undanganForm.template}\n\nSaya sudah memahami ketentuan pemesanan minimal 7 hari sebelum acara.\nMohon konfirmasi ketersediaan dan harga ya, terima kasih! 🙏`;
 
     try {
-      await addDoc(collection(db, "pesananUndangan"), {
+      const newOrder = {
+        id: `INV-${Date.now()}`,
         couple_name: undanganForm.namaMempelai,
         template: undanganForm.template,
         date: formattedTanggal,
@@ -149,8 +130,10 @@ export default function Home() {
         location: undanganForm.lokasi,
         phone: "",
         status: "New",
-        createdAt: Timestamp.now(),
-      });
+        createdAt: new Date().toISOString(),
+      };
+      const existingOrders = JSON.parse(localStorage.getItem("dummyOrders") || "[]");
+      localStorage.setItem("dummyOrders", JSON.stringify([...existingOrders, newOrder]));
 
       setWaText(text);
       setIsUndanganOpen(false);
@@ -466,12 +449,7 @@ export default function Home() {
 
             <Carousel className="w-full max-w-5xl mx-auto" opts={{ loop: true }}>
               <CarouselContent className="-ml-2 md:-ml-4">
-                {[
-                  { name: "Sarah & Dimas", event: "Wedding", text: "Kak Riswandi MC yang luar biasa! Acara jadi hidup, tidak kaku, dan tamu pada betah. Rekomen banget buat yang mau nikah!" },
-                  { name: "PT. Maju Mundur", event: "Corporate Gathering", text: "Bisa mencairkan suasana dengan cepat. Ice breakingnya fresh dan bikin semua karyawan ketawa lepas. Top!" },
-                  { name: "Anita", event: "Sweet Seventeen", text: "Acara ulang tahunku jadi super seru berkat MC Riswandi. Temen-temen bilang acaranya pecah banget." },
-                  { name: "Budi & Rina", event: "Wedding", text: "Undangan digitalnya elegan dan proses pembuatannya cepat. MC-nya juga on time dan sangat profesional. Perfect!" }
-                ].map((testi, i) => (
+                {testimonialsData.map((testi, i) => (
                   <CarouselItem key={i} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
                     <div className="h-full p-1">
                       <Card className="h-full border-none shadow-md bg-white/10 backdrop-blur-md text-white flex flex-col hover:bg-white/15 transition-colors">

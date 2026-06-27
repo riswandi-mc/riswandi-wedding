@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useState } from "react";
+import settingsData from "@/data/settings.json";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,22 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, FileSpreadsheet, Images, Star, ArrowUpRight, MessageCircle } from "lucide-react";
 
 export default function DashboardPage() {
-  const [waNumber, setWaNumber] = useState("6287737860657");
-
-  useEffect(() => {
-    const fetchWaNumber = async () => {
-      try {
-        const docRef = doc(db, "noWa", "WAUtama");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists() && docSnap.data().nomer) {
-          setWaNumber(docSnap.data().nomer);
-        }
-      } catch (error) {
-        console.error("Gagal memuat nomor WA:", error);
-      }
-    };
-    fetchWaNumber();
-  }, []);
+  const [waNumber, setWaNumber] = useState(settingsData.phone);
 
   // Mock recent activity data
   const [recentBookings] = useState([

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import calendarEventsData from "@/data/calendar-events.json";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,25 +30,21 @@ type EventsMap = {
   [day: number]: CalendarEvent[];
 };
 
-// Mock events for June 2026
-const mockEvents: EventsMap = {
-  5: [
-    { id: "1", client: "Aria & Sarah", service: "MC Wedding Private", time: "08:00 - 13:00", location: "Kramat Jati, Jakarta Timur", phone: "6281234567891" }
-  ],
-  12: [
-    { id: "2", client: "Budi & Rina", service: "MC Wedding Partner", time: "11:00 - 16:00", location: "Gedung Manggala Wanabakti, Jkt", phone: "6281234567892" }
-  ],
-  18: [
-    { id: "3", client: "PT. Krakatau Steel", service: "MC All Event", time: "13:00 - 18:00", location: "Balai Kartini, Jakarta", phone: "6281234567893" }
-  ],
-  26: [
-    { id: "4", client: "Sarah & Dimas", service: "MC Wedding Partner", time: "09:00 - 14:00", location: "Hotel Santika, Bekasi", phone: "6281234567894" }
-  ]
-};
-
 export default function CalendarPage() {
   const [currentDate] = useState(new Date(2026, 5, 1)); // Fixed mock to June 2026
   const [selectedDay, setSelectedDay] = useState<number | null>(12); // Default selected June 12
+  const [eventsMap, setEventsMap] = useState<EventsMap>({});
+
+  useEffect(() => {
+    const localData = localStorage.getItem("dummyCalendarEvents");
+    if (localData) {
+      setEventsMap(JSON.parse(localData));
+    } else {
+      // JSON keys are strings, but our EventsMap expects numbers, so they will be coerced or we can just cast it
+      setEventsMap(calendarEventsData as unknown as EventsMap);
+      localStorage.setItem("dummyCalendarEvents", JSON.stringify(calendarEventsData));
+    }
+  }, []);
 
   // Month stats calculation
   const totalDays = 30; // June has 30 days
@@ -56,7 +53,7 @@ export default function CalendarPage() {
   const daysArray = Array.from({ length: totalDays }, (_, i) => i + 1);
   const emptyOffsetCells = Array.from({ length: startDayOffset }, (_, i) => i);
 
-  const selectedDayEvents = selectedDay ? mockEvents[selectedDay] || [] : [];
+  const selectedDayEvents = selectedDay ? eventsMap[selectedDay] || [] : [];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -132,7 +129,7 @@ export default function CalendarPage() {
 
                 {/* Actual Days */}
                 {daysArray.map((day) => {
-                  const hasEvents = !!mockEvents[day];
+                  const hasEvents = !!eventsMap[day];
                   const isSelected = selectedDay === day;
 
                   return (
@@ -152,7 +149,7 @@ export default function CalendarPage() {
                         <div className="flex gap-1 items-center justify-end w-full">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                           <span className="text-[9px] font-bold text-emerald-700 hidden sm:inline">
-                            {mockEvents[day].length} MC
+                            {eventsMap[day].length} MC
                           </span>
                         </div>
                       )}

@@ -1,10 +1,3 @@
-"use client"
-
-import * as React from "react"
-import { useState, useEffect } from "react"
-import { getAuth, onAuthStateChanged } from "firebase/auth"
-import { app } from "@/lib/firebase"
-
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
@@ -31,7 +24,7 @@ import {
   MoreHorizontal
 } from "lucide-react"
 
-const auth = getAuth(app)
+
 
 // This is sample data.
 const data = {
@@ -117,33 +110,16 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [userState, setUserState] = useState({
-    name: "Admin",
-    email: "Loading...",
-    avatar: "/avatars/shadcn.jpg",
-  });
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUserState({
-          name: currentUser.displayName || "Admin Riswandi",
-          email: currentUser.email || "admin@example.com",
-          avatar: currentUser.photoURL || "/avatars/shadcn.jpg",
-        });
-      } else {
-        setUserState({
-          name: "Admin",
-          email: "Belum login",
-          avatar: "/avatars/shadcn.jpg",
-        });
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
+export function AppSidebar({
+  user,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & {
+  user: {
+    name: string
+    email: string
+    avatar: string
+  }
+}) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -168,7 +144,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={data.projects} title="Pintasan" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={userState} />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

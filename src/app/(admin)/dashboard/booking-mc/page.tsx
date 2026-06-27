@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, Timestamp, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import bookingsData from "@/data/bookings.json";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { id as localeId } from "date-fns/locale";
@@ -64,34 +63,16 @@ export default function BookingMCPage() {
   });
   const [isDateOpen, setIsDateOpen] = useState(false);
 
-  // Fetch bookings from Firestore in real-time
+  // Fetch bookings from local state/storage
   useEffect(() => {
-    const q = query(collection(db, "bookingMC"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const data: Booking[] = snapshot.docs.map((docSnap) => {
-          const d = docSnap.data();
-          return {
-            id: docSnap.id,
-            clientName: d.clientName || "",
-            date: d.date || "",
-            service: d.service || "",
-            phone: d.phone || "",
-            status: d.status || "Pending",
-            createdAt: d.createdAt,
-          };
-        });
-        setBookings(data);
-        setIsLoading(false);
-      },
-      (error) => {
-        console.error("Gagal mengambil data booking:", error);
-        setIsLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
+    const localData = localStorage.getItem("dummyBookings");
+    if (localData) {
+      setBookings(JSON.parse(localData));
+    } else {
+      setBookings(bookingsData as Booking[]);
+      localStorage.setItem("dummyBookings", JSON.stringify(bookingsData));
+    }
+    setIsLoading(false);
   }, []);
 
   const handleAddSubmit = async () => {
@@ -102,14 +83,21 @@ export default function BookingMCPage() {
     setIsAddSubmitting(true);
     try {
       const formattedDate = format(newBooking.date, "dd MMMM yyyy", { locale: localeId });
-      await addDoc(collection(db, "bookingMC"), {
+      
+      const addedBooking: Booking = {
+        id: `MC-${Date.now()}`,
         clientName: newBooking.clientName,
         date: formattedDate,
         service: newBooking.service,
         phone: newBooking.phone || "",
         status: newBooking.status,
-        createdAt: Timestamp.now(),
-      });
+        createdAt: new Date().toISOString(),
+      };
+      
+      const newBookingsList = [addedBooking, ...bookings];
+      setBookings(newBookingsList);
+      localStorage.setItem("dummyBookings", JSON.stringify(newBookingsList));
+
       setIsAddOpen(false);
       setNewBooking({ clientName: "", date: undefined, service: "MC All Event", phone: "", status: "Pending" });
     } catch (error) {
@@ -122,7 +110,9 @@ export default function BookingMCPage() {
 
   const handleStatusChange = async (id: string, newStatus: BookingStatus) => {
     try {
-      await updateDoc(doc(db, "bookingMC", id), { status: newStatus });
+      const updatedBookings = bookings.map(b => b.id === id ? { ...b, status: newStatus } : b);
+      setBookings(updatedBookings);
+      localStorage.setItem("dummyBookings", JSON.stringify(updatedBookings));
     } catch (error) {
       console.error("Gagal mengubah status:", error);
       alert("Gagal mengubah status booking.");
@@ -132,7 +122,9 @@ export default function BookingMCPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus data booking ini?")) {
       try {
-        await deleteDoc(doc(db, "bookingMC", id));
+        const remainingBookings = bookings.filter(b => b.id !== id);
+        setBookings(remainingBookings);
+        localStorage.setItem("dummyBookings", JSON.stringify(remainingBookings));
       } catch (error) {
         console.error("Gagal menghapus booking:", error);
         alert("Gagal menghapus data booking.");

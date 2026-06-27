@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import settingsData from "@/data/settings.json";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -40,14 +39,13 @@ export default function SettingsPage() {
     const fetchWaConfig = async () => {
       setIsWaLoading(true);
       try {
-        const docRef = doc(db, "noWa", "nomer");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setWaConfig(prev => ({ ...prev, phone: data.nomer || "6287737860657" }));
+        const localData = localStorage.getItem("dummySettings");
+        if (localData) {
+          const data = JSON.parse(localData);
+          setWaConfig(prev => ({ ...prev, phone: data.phone || settingsData.phone }));
         } else {
-          // Buat default document jika belum ada
-          await setDoc(docRef, { nomer: "6287737860657" }, { merge: true });
+          setWaConfig(prev => ({ ...prev, phone: settingsData.phone }));
+          localStorage.setItem("dummySettings", JSON.stringify(settingsData));
         }
       } catch (error) {
         console.error("Gagal mengambil data WA:", error);
@@ -69,8 +67,9 @@ export default function SettingsPage() {
     e.preventDefault();
     setIsWaSaving(true);
     try {
-      const docRef = doc(db, "noWa", "nomer");
-      await setDoc(docRef, { nomer: waConfig.phone }, { merge: true });
+      const currentSettings = JSON.parse(localStorage.getItem("dummySettings") || JSON.stringify(settingsData));
+      currentSettings.phone = waConfig.phone;
+      localStorage.setItem("dummySettings", JSON.stringify(currentSettings));
       alert("Pengaturan integrasi WhatsApp berhasil disimpan!");
     } catch (error) {
       console.error("Gagal menyimpan data WA:", error);
