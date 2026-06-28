@@ -85,6 +85,42 @@ function DialogContent({
   )
 }
 
+function DialogFormContent({
+  className,
+  bodyClassName,
+  footerClassName,
+  title,
+  description,
+  children,
+  footer,
+  showCloseButton = true,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  bodyClassName?: string
+  footerClassName?: string
+  title: React.ReactNode
+  description?: React.ReactNode
+  footer: React.ReactNode
+  showCloseButton?: boolean
+}) {
+  return (
+    <DialogContent className={cn("overflow-hidden p-0", className)} showCloseButton={showCloseButton} {...props}>
+      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full flex-col">
+        <div className="shrink-0 border-b border-border/70 px-5 py-4 pr-14 sm:px-6 sm:py-5">
+          <DialogHeader className="gap-2">
+            <DialogTitle className="text-lg leading-tight sm:text-xl">{title}</DialogTitle>
+            {description ? <DialogDescription className="text-sm leading-6">{description}</DialogDescription> : null}
+          </DialogHeader>
+        </div>
+        <div className={cn("min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6", bodyClassName)}>{children}</div>
+        <div className={cn("shrink-0 border-t border-border/70 bg-background px-5 py-4 sm:px-6", footerClassName)}>
+          {footer}
+        </div>
+      </div>
+    </DialogContent>
+  )
+}
+
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -158,6 +194,7 @@ export {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogFormContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,

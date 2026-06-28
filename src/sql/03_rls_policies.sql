@@ -1,5 +1,5 @@
 -- 03_rls_policies.sql
--- Row Level Security policies for public content, admin CRUD, and gallery storage.
+-- Row Level Security policies for public content, admin CRUD, and public media storage.
 
 create or replace function public.has_admin_role(user_id uuid default auth.uid())
 returns boolean
@@ -187,11 +187,23 @@ on storage.objects for select
 to anon, authenticated
 using (bucket_id = 'gallery');
 
+drop policy if exists "invitation_template_storage_public_read" on storage.objects;
+create policy "invitation_template_storage_public_read"
+on storage.objects for select
+to anon, authenticated
+using (bucket_id = 'invitation-template');
+
 drop policy if exists "gallery_storage_admin_insert" on storage.objects;
 create policy "gallery_storage_admin_insert"
 on storage.objects for insert
 to authenticated
 with check (bucket_id = 'gallery' and public.has_admin_role(auth.uid()));
+
+drop policy if exists "invitation_template_storage_admin_insert" on storage.objects;
+create policy "invitation_template_storage_admin_insert"
+on storage.objects for insert
+to authenticated
+with check (bucket_id = 'invitation-template' and public.has_admin_role(auth.uid()));
 
 drop policy if exists "gallery_storage_admin_update" on storage.objects;
 create policy "gallery_storage_admin_update"
@@ -200,8 +212,21 @@ to authenticated
 using (bucket_id = 'gallery' and public.has_admin_role(auth.uid()))
 with check (bucket_id = 'gallery' and public.has_admin_role(auth.uid()));
 
+drop policy if exists "invitation_template_storage_admin_update" on storage.objects;
+create policy "invitation_template_storage_admin_update"
+on storage.objects for update
+to authenticated
+using (bucket_id = 'invitation-template' and public.has_admin_role(auth.uid()))
+with check (bucket_id = 'invitation-template' and public.has_admin_role(auth.uid()));
+
 drop policy if exists "gallery_storage_admin_delete" on storage.objects;
 create policy "gallery_storage_admin_delete"
 on storage.objects for delete
 to authenticated
 using (bucket_id = 'gallery' and public.has_admin_role(auth.uid()));
+
+drop policy if exists "invitation_template_storage_admin_delete" on storage.objects;
+create policy "invitation_template_storage_admin_delete"
+on storage.objects for delete
+to authenticated
+using (bucket_id = 'invitation-template' and public.has_admin_role(auth.uid()));

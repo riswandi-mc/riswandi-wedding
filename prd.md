@@ -460,8 +460,8 @@ Output:
 
 ## 16. Open Questions
 
-1. Apakah admin hanya satu orang atau akan ada beberapa admin?
-2. Apakah area layanan MC perlu disimpan sebagai field khusus?
-3. Apakah order undangan perlu upload file materi dari customer di fase berikutnya?
-4. Apakah kalender perlu sinkron Google Calendar di masa depan?
-5. Apakah WhatsApp cukup via `wa.me`, atau nanti memakai WhatsApp Business API?
+1. Apakah admin hanya satu orang atau akan ada beberapa admin? ada 2 admin
+2. Apakah area layanan MC perlu disimpan sebagai field khusus? tidak
+3. Apakah order undangan perlu upload file materi dari customer di fase berikutnya? ya
+4. Apakah kalender perlu sinkron Google Calendar di masa depan?tidak
+5. Apakah WhatsApp cukup via `wa.me`, atau nanti memakai WhatsApp Business API?via wa.me

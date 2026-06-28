@@ -2,9 +2,11 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { differenceInCalendarDays, format, startOfDay } from "date-fns"
 import { id as indonesianLocale } from "date-fns/locale"
 import {
+  ArrowRight,
   Calendar as CalendarIcon,
   Camera,
   CheckCircle,
@@ -28,13 +30,14 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogFooter, DialogFormContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { resolvePublicStorageUrl } from "@/lib/storage-url"
 
 type HomepageSettings = {
   brand_name: string
@@ -214,11 +217,7 @@ function getServiceBadgeClass(variant: string | null) {
 }
 
 function getTemplatePreview(template: HomepageTemplate) {
-  if (template.preview_image_url) {
-    return template.preview_image_url
-  }
-
-  return `https://images.unsplash.com/photo-1528605105345-5344ea20e269?q=80&w=800&auto=format&fit=crop&sig=${template.img_sig ?? template.sort_order}`
+  return resolvePublicStorageUrl("invitation-template", template.preview_image_url)
 }
 
 function getGalleryPreview(item: HomepageGalleryItem) {
@@ -521,48 +520,60 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           </div>
 
           {data.services.length > 0 ? (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              {data.services.map((service) => (
-                <Card
-                  key={service.slug}
-                  className={cn(
-                    "flex flex-col transition-colors shadow-sm hover:border-primary hover:shadow-md",
-                    service.is_featured ? "relative overflow-hidden border-primary/40 shadow-md" : "border-primary/20"
-                  )}
-                >
-                  {service.badge_variant === "best_value" ? (
-                    <div className="absolute top-0 right-0 z-10 rounded-bl-lg bg-primary px-4 py-1 text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
-                      Best Value
-                    </div>
-                  ) : null}
-                  <CardHeader>
-                    {service.badge_label ? (
-                      <div className="mb-2 flex justify-between">
-                        <Badge variant="outline" className={getServiceBadgeClass(service.badge_variant)}>
-                          {service.badge_label}
-                        </Badge>
+            <div className="space-y-10">
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                {data.services.slice(0, 3).map((service) => (
+                  <Card
+                    key={service.slug}
+                    className={cn(
+                      "flex flex-col transition-colors shadow-sm hover:border-primary hover:shadow-md",
+                      service.is_featured ? "relative overflow-hidden border-primary/40 shadow-md" : "border-primary/20"
+                    )}
+                  >
+                    {service.badge_variant === "best_value" ? (
+                      <div className="absolute top-0 right-0 z-10 rounded-bl-lg bg-primary px-4 py-1 text-xs font-bold uppercase tracking-wider text-primary-foreground shadow-sm">
+                        Best Value
                       </div>
                     ) : null}
-                    <CardTitle className="font-heading text-2xl">{service.title}</CardTitle>
-                    <CardDescription>{service.short_description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1">
-                    <ul className="space-y-3 text-sm text-muted-foreground">
-                      {service.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-2">
-                          <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <CardFooter>
-                    <Button className="w-full" onClick={() => openMcDialog(service.title)}>
-                      Booking Sekarang
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+                    <CardHeader>
+                      {service.badge_label ? (
+                        <div className="mb-2 flex justify-between">
+                          <Badge variant="outline" className={getServiceBadgeClass(service.badge_variant)}>
+                            {service.badge_label}
+                          </Badge>
+                        </div>
+                      ) : null}
+                      <CardTitle className="font-heading text-2xl">{service.title}</CardTitle>
+                      <CardDescription>{service.short_description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                      <ul className="space-y-3 text-sm text-muted-foreground">
+                        {service.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-2">
+                            <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <CardFooter>
+                      <Button className="w-full" onClick={() => openMcDialog(service.title)}>
+                        Booking Sekarang
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+              {data.services.length > 3 ? (
+                <div className="text-center">
+                  <Button variant="outline" size="lg" asChild>
+                    <Link href="/layanan-mc" className="inline-flex items-center gap-2">
+                      Lihat Semua Layanan MC
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              ) : null}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
@@ -591,58 +602,70 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
             {data.templates.length > 0 ? (
               <div className="mb-12 grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4">
-                {data.templates.map((template) => (
-                  <Card
-                    key={template.slug}
-                    className="group flex flex-col overflow-hidden border bg-background shadow-sm transition-all duration-300 hover:shadow-lg"
-                  >
-                    <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-                      <Image
-                        src={getTemplatePreview(template)}
-                        alt={template.name}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    </div>
-                    <CardContent className="flex flex-1 flex-col items-start gap-1 p-3 md:p-4">
-                      <span className="line-clamp-2 font-heading text-xs font-semibold md:text-[15px]">
-                        {template.name}
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-muted-foreground line-through md:text-xs">
-                          {formatCurrency(template.original_price)}
-                        </span>
-                        <span className="text-xs font-bold text-primary md:text-sm">
-                          {formatCurrency(template.promo_price)}
-                        </span>
+                {data.templates.map((template, index) => {
+                  const previewSrc = getTemplatePreview(template)
+
+                  return (
+                    <Card
+                      key={template.slug}
+                      className="group flex flex-col overflow-hidden border bg-background shadow-sm transition-all duration-300 hover:shadow-lg"
+                    >
+                      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+                        {previewSrc ? (
+                          <Image
+                            src={previewSrc}
+                            alt={`${template.name} preview`}
+                            fill
+                            sizes="(max-width: 768px) 50vw, (max-width: 1280px) 25vw, 20vw"
+                            priority={index < 2}
+                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center px-4 text-center text-xs text-muted-foreground">
+                            Preview belum tersedia
+                          </div>
+                        )}
                       </div>
-                    </CardContent>
-                    <CardFooter className="grid w-full grid-cols-2 gap-1.5 p-3 pt-0 md:gap-2 md:p-4 md:pt-0">
-                      {template.is_demo_ready && template.demo_url ? (
-                        <Button variant="outline" className="w-full px-0 text-[10px] md:text-xs" asChild>
-                          <a
-                            href={template.demo_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center"
-                          >
-                            Demo <ExternalLink className="ml-1 h-2.5 w-2.5 shrink-0 md:h-3 md:w-3" />
-                          </a>
+                      <CardContent className="flex flex-1 flex-col items-start gap-1 p-3 md:p-4">
+                        <span className="line-clamp-2 font-heading text-xs font-semibold md:text-[15px]">
+                          {template.name}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] text-muted-foreground line-through md:text-xs">
+                            {formatCurrency(template.original_price)}
+                          </span>
+                          <span className="text-xs font-bold text-primary md:text-sm">
+                            {formatCurrency(template.promo_price)}
+                          </span>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="grid w-full grid-cols-2 gap-1.5 p-3 pt-0 md:gap-2 md:p-4 md:pt-0">
+                        {template.is_demo_ready && template.demo_url ? (
+                          <Button variant="outline" className="w-full px-0 text-[10px] md:text-xs" asChild>
+                            <a
+                              href={template.demo_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-center"
+                            >
+                              Demo <ExternalLink className="ml-1 h-2.5 w-2.5 shrink-0 md:h-3 md:w-3" />
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button variant="outline" className="w-full text-[10px] opacity-70 md:text-xs" disabled>
+                            Proses
+                          </Button>
+                        )}
+                        <Button
+                          className="w-full text-[10px] md:text-xs"
+                          onClick={() => openInvitationDialog(template.name)}
+                        >
+                          Pesan
                         </Button>
-                      ) : (
-                        <Button variant="outline" className="w-full text-[10px] opacity-70 md:text-xs" disabled>
-                          Proses
-                        </Button>
-                      )}
-                      <Button
-                        className="w-full text-[10px] md:text-xs"
-                        onClick={() => openInvitationDialog(template.name)}
-                      >
-                        Pesan
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
+                      </CardFooter>
+                    </Card>
+                  )
+                })}
               </div>
             ) : (
               <div className="rounded-2xl border border-dashed border-border bg-background p-10 text-center text-muted-foreground">
@@ -975,326 +998,321 @@ export default function HomePageClient({ data }: HomePageClientProps) {
       </a>
 
       <Dialog open={isMCOpen} onOpenChange={setIsMCOpen}>
-        <DialogContent className="sm:max-w-[460px]">
-          <DialogHeader>
-            <DialogTitle>Booking Layanan MC</DialogTitle>
-            <DialogDescription>
-              Isi detail acara Anda. Data booking akan langsung tersimpan dan tim kami akan segera
-              menghubungi Anda.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="mc-client-name">Nama Klien</Label>
-              <Input
-                id="mc-client-name"
-                placeholder="Cth: Budi dan Rina"
-                value={mcForm.clientName}
-                onChange={(event) =>
-                  setMcForm((current) => ({ ...current, clientName: event.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="mc-phone">Nomor WhatsApp</Label>
-              <Input
-                id="mc-phone"
-                placeholder="Cth: 628123456789"
-                value={mcForm.phone}
-                onChange={(event) =>
-                  setMcForm((current) => ({ ...current, phone: event.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Tanggal Acara</Label>
-              <Popover open={mcDateOpen} onOpenChange={setMcDateOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "h-10 w-full justify-start bg-background text-left font-normal",
-                      !mcForm.eventDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                    {mcForm.eventDate ? toDisplayDate(mcForm.eventDate) : <span>Pilih tanggal acara</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="z-50 w-auto bg-background p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={mcForm.eventDate}
-                    onSelect={(date) => {
-                      setMcForm((current) => ({ ...current, eventDate: date }))
-                      setMcDateOpen(false)
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="mc-service-name">Pilihan Layanan</Label>
-              <Select
-                value={mcForm.serviceName}
-                onValueChange={(value) =>
-                  setMcForm((current) => ({ ...current, serviceName: value }))
-                }
+        <DialogFormContent
+          className="sm:max-w-[460px]"
+          title="Booking Layanan MC"
+          description="Isi detail acara Anda. Data booking akan langsung tersimpan dan tim kami akan segera menghubungi Anda."
+          bodyClassName="grid gap-4"
+          footer={
+            <DialogFooter>
+              <Button
+                onClick={handleMcSubmit}
+                disabled={isMCSubmitting}
+                className="flex w-full items-center justify-center gap-2"
               >
-                <SelectTrigger id="mc-service-name">
-                  <SelectValue placeholder="Pilih layanan" />
-                </SelectTrigger>
-                <SelectContent>
-                  {data.services.map((service) => (
-                    <SelectItem key={service.slug} value={service.title}>
-                      {service.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="mc-location">Lokasi Acara</Label>
-              <Input
-                id="mc-location"
-                placeholder="Opsional"
-                value={mcForm.eventLocation}
-                onChange={(event) =>
-                  setMcForm((current) => ({ ...current, eventLocation: event.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="mc-notes">Catatan Tambahan</Label>
-              <textarea
-                id="mc-notes"
-                rows={4}
-                placeholder="Opsional"
-                value={mcForm.notes}
-                onChange={(event) =>
-                  setMcForm((current) => ({ ...current, notes: event.target.value }))
-                }
-                className="min-h-24 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              />
-            </div>
-            {mcError ? (
-              <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-                {mcError}
-              </div>
-            ) : null}
+                {isMCSubmitting ? "Mengirim..." : "Booking Sekarang"}
+                <CalendarIcon className="h-4 w-4" />
+              </Button>
+            </DialogFooter>
+          }
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="mc-client-name">Nama Klien</Label>
+            <Input
+              id="mc-client-name"
+              placeholder="Cth: Budi dan Rina"
+              value={mcForm.clientName}
+              onChange={(event) =>
+                setMcForm((current) => ({ ...current, clientName: event.target.value }))
+              }
+            />
           </div>
-          <DialogFooter>
-            <Button
-              onClick={handleMcSubmit}
-              disabled={isMCSubmitting}
-              className="flex w-full items-center justify-center gap-2"
+          <div className="grid gap-2">
+            <Label htmlFor="mc-phone">Nomor WhatsApp</Label>
+            <Input
+              id="mc-phone"
+              placeholder="Cth: 628123456789"
+              value={mcForm.phone}
+              onChange={(event) =>
+                setMcForm((current) => ({ ...current, phone: event.target.value }))
+              }
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Tanggal Acara</Label>
+            <Popover open={mcDateOpen} onOpenChange={setMcDateOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "h-10 w-full justify-start bg-background text-left font-normal",
+                    !mcForm.eventDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                  {mcForm.eventDate ? toDisplayDate(mcForm.eventDate) : <span>Pilih tanggal acara</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="z-50 w-auto bg-background p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={mcForm.eventDate}
+                  onSelect={(date) => {
+                    setMcForm((current) => ({ ...current, eventDate: date }))
+                    setMcDateOpen(false)
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="mc-service-name">Pilihan Layanan</Label>
+            <Select
+              value={mcForm.serviceName}
+              onValueChange={(value) =>
+                setMcForm((current) => ({ ...current, serviceName: value }))
+              }
             >
-              {isMCSubmitting ? "Mengirim..." : "Booking Sekarang"}
-              <CalendarIcon className="h-4 w-4" />
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+              <SelectTrigger id="mc-service-name">
+                <SelectValue placeholder="Pilih layanan" />
+              </SelectTrigger>
+              <SelectContent>
+                {data.services.map((service) => (
+                  <SelectItem key={service.slug} value={service.title}>
+                    {service.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="mc-location">Lokasi Acara</Label>
+            <Input
+              id="mc-location"
+              placeholder="Opsional"
+              value={mcForm.eventLocation}
+              onChange={(event) =>
+                setMcForm((current) => ({ ...current, eventLocation: event.target.value }))
+              }
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="mc-notes">Catatan Tambahan</Label>
+            <textarea
+              id="mc-notes"
+              rows={4}
+              placeholder="Opsional"
+              value={mcForm.notes}
+              onChange={(event) =>
+                setMcForm((current) => ({ ...current, notes: event.target.value }))
+              }
+              className="min-h-24 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            />
+          </div>
+          {mcError ? (
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              {mcError}
+            </div>
+          ) : null}
+        </DialogFormContent>
       </Dialog>
 
       <Dialog open={isUndanganOpen} onOpenChange={setIsUndanganOpen}>
-        <DialogContent className="sm:max-w-[460px]">
-          <DialogHeader>
-            <DialogTitle>Pesan Undangan Digital</DialogTitle>
-            <DialogDescription>
-              Lengkapi detail di bawah untuk menyimpan pesanan Anda lalu lanjut ke WhatsApp.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="invitation-couple-name">Nama Mempelai</Label>
-              <Input
-                id="invitation-couple-name"
-                placeholder="Cth: Romeo dan Juliet"
-                value={invitationForm.coupleName}
-                onChange={(event) =>
-                  setInvitationForm((current) => ({ ...current, coupleName: event.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="invitation-phone">Nomor WhatsApp</Label>
-              <Input
-                id="invitation-phone"
-                placeholder="Cth: 628123456789"
-                value={invitationForm.phone}
-                onChange={(event) =>
-                  setInvitationForm((current) => ({ ...current, phone: event.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>Tanggal Acara</Label>
-              <Popover open={invitationDateOpen} onOpenChange={setInvitationDateOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "h-10 w-full justify-start bg-background text-left font-normal",
-                      !invitationForm.eventDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                    {invitationForm.eventDate ? (
-                      toDisplayDate(invitationForm.eventDate)
-                    ) : (
-                      <span>Pilih tanggal acara</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="z-50 w-auto bg-background p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={invitationForm.eventDate}
-                    onSelect={(date) => {
-                      setInvitationForm((current) => ({ ...current, eventDate: date }))
-                      setInvitationDateOpen(false)
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="grid gap-2">
-              <Label>Tanggal Target Jadi Undangan</Label>
-              <Popover
-                open={invitationTargetDateOpen}
-                onOpenChange={setInvitationTargetDateOpen}
+        <DialogFormContent
+          className="sm:max-w-[460px]"
+          title="Pesan Undangan Digital"
+          description="Lengkapi detail di bawah untuk menyimpan pesanan Anda lalu lanjut ke WhatsApp."
+          bodyClassName="grid gap-4"
+          footer={
+            <DialogFooter>
+              <Button
+                onClick={handleInvitationSubmit}
+                disabled={isInvitationSubmitting}
+                className="w-full"
               >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "h-10 w-full justify-start bg-background text-left font-normal",
-                      !invitationForm.targetCompletionDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                    {invitationForm.targetCompletionDate ? (
-                      toDisplayDate(invitationForm.targetCompletionDate)
-                    ) : (
-                      <span>Pilih tanggal target jadi</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="z-50 w-auto bg-background p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={invitationForm.targetCompletionDate}
-                    onSelect={(date) => {
-                      setInvitationForm((current) => ({
-                        ...current,
-                        targetCompletionDate: date,
-                      }))
-                      setInvitationTargetDateOpen(false)
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="invitation-location">Lokasi Acara</Label>
-              <Input
-                id="invitation-location"
-                placeholder="Cth: Gedung Manggala Wanabakti, Jakarta"
-                value={invitationForm.eventLocation}
-                onChange={(event) =>
-                  setInvitationForm((current) => ({
-                    ...current,
-                    eventLocation: event.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="invitation-template">Pilihan Template</Label>
-              <Select
-                value={invitationForm.templateName}
-                onValueChange={(value) =>
-                  setInvitationForm((current) => ({ ...current, templateName: value }))
-                }
-              >
-                <SelectTrigger id="invitation-template">
-                  <SelectValue placeholder="Pilih template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {data.templates.map((template) => (
-                    <SelectItem key={template.slug} value={template.name}>
-                      {template.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="invitation-notes">Catatan Tambahan</Label>
-              <textarea
-                id="invitation-notes"
-                rows={4}
-                placeholder="Opsional"
-                value={invitationForm.notes}
-                onChange={(event) =>
-                  setInvitationForm((current) => ({ ...current, notes: event.target.value }))
-                }
-                className="min-h-24 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              />
-            </div>
-            {invitationError ? (
-              <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-                {invitationError}
-              </div>
-            ) : null}
+                {isInvitationSubmitting ? "Memproses..." : "Pesan Sekarang"}
+              </Button>
+            </DialogFooter>
+          }
+        >
+          <div className="grid gap-2">
+            <Label htmlFor="invitation-couple-name">Nama Mempelai</Label>
+            <Input
+              id="invitation-couple-name"
+              placeholder="Cth: Romeo dan Juliet"
+              value={invitationForm.coupleName}
+              onChange={(event) =>
+                setInvitationForm((current) => ({ ...current, coupleName: event.target.value }))
+              }
+            />
           </div>
-          <DialogFooter>
-            <Button
-              onClick={handleInvitationSubmit}
-              disabled={isInvitationSubmitting}
-              className="w-full"
+          <div className="grid gap-2">
+            <Label htmlFor="invitation-phone">Nomor WhatsApp</Label>
+            <Input
+              id="invitation-phone"
+              placeholder="Cth: 628123456789"
+              value={invitationForm.phone}
+              onChange={(event) =>
+                setInvitationForm((current) => ({ ...current, phone: event.target.value }))
+              }
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label>Tanggal Acara</Label>
+            <Popover open={invitationDateOpen} onOpenChange={setInvitationDateOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "h-10 w-full justify-start bg-background text-left font-normal",
+                    !invitationForm.eventDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                  {invitationForm.eventDate ? (
+                    toDisplayDate(invitationForm.eventDate)
+                  ) : (
+                    <span>Pilih tanggal acara</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="z-50 w-auto bg-background p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={invitationForm.eventDate}
+                  onSelect={(date) => {
+                    setInvitationForm((current) => ({ ...current, eventDate: date }))
+                    setInvitationDateOpen(false)
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="grid gap-2">
+            <Label>Tanggal Target Jadi Undangan</Label>
+            <Popover open={invitationTargetDateOpen} onOpenChange={setInvitationTargetDateOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "h-10 w-full justify-start bg-background text-left font-normal",
+                    !invitationForm.targetCompletionDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                  {invitationForm.targetCompletionDate ? (
+                    toDisplayDate(invitationForm.targetCompletionDate)
+                  ) : (
+                    <span>Pilih tanggal target jadi</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="z-50 w-auto bg-background p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={invitationForm.targetCompletionDate}
+                  onSelect={(date) => {
+                    setInvitationForm((current) => ({
+                      ...current,
+                      targetCompletionDate: date,
+                    }))
+                    setInvitationTargetDateOpen(false)
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="invitation-location">Lokasi Acara</Label>
+            <Input
+              id="invitation-location"
+              placeholder="Cth: Gedung Manggala Wanabakti, Jakarta"
+              value={invitationForm.eventLocation}
+              onChange={(event) =>
+                setInvitationForm((current) => ({
+                  ...current,
+                  eventLocation: event.target.value,
+                }))
+              }
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="invitation-template">Pilihan Template</Label>
+            <Select
+              value={invitationForm.templateName}
+              onValueChange={(value) =>
+                setInvitationForm((current) => ({ ...current, templateName: value }))
+              }
             >
-              {isInvitationSubmitting ? "Memproses..." : "Pesan Sekarang"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+              <SelectTrigger id="invitation-template">
+                <SelectValue placeholder="Pilih template" />
+              </SelectTrigger>
+              <SelectContent>
+                {data.templates.map((template) => (
+                  <SelectItem key={template.slug} value={template.name}>
+                    {template.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="invitation-notes">Catatan Tambahan</Label>
+            <textarea
+              id="invitation-notes"
+              rows={4}
+              placeholder="Opsional"
+              value={invitationForm.notes}
+              onChange={(event) =>
+                setInvitationForm((current) => ({ ...current, notes: event.target.value }))
+              }
+              className="min-h-24 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            />
+          </div>
+          {invitationError ? (
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              {invitationError}
+            </div>
+          ) : null}
+        </DialogFormContent>
       </Dialog>
 
       <Dialog open={Boolean(confirmation)} onOpenChange={(open) => (!open ? setConfirmation(null) : null)}>
-        <DialogContent className="sm:max-w-[460px]">
-          <DialogHeader>
-            <DialogTitle>{confirmation?.title}</DialogTitle>
-            <DialogDescription>{confirmation?.description}</DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <div className="rounded-md border bg-muted p-4 text-sm whitespace-pre-wrap text-muted-foreground">
-              {confirmation?.whatsappMessage}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmation(null)}>
-              Tutup
-            </Button>
-            <Button
-              onClick={() => {
-                if (!confirmation) {
-                  return
-                }
+        <DialogFormContent
+          className="sm:max-w-[460px]"
+          title={confirmation?.title ?? "Konfirmasi"}
+          description={confirmation?.description}
+          bodyClassName="grid gap-4"
+          footer={
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setConfirmation(null)}>
+                Tutup
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!confirmation) {
+                    return
+                  }
 
-                window.open(
-                  buildWhatsAppUrl(waNumber, confirmation.whatsappMessage),
-                  "_blank",
-                  "noopener,noreferrer"
-                )
-                setConfirmation(null)
-              }}
-              className="flex items-center justify-center gap-2"
-            >
-              Lanjut ke WhatsApp
-              <MessageCircle className="h-4 w-4" />
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+                  window.open(
+                    buildWhatsAppUrl(waNumber, confirmation.whatsappMessage),
+                    "_blank",
+                    "noopener,noreferrer"
+                  )
+                  setConfirmation(null)
+                }}
+                className="flex items-center justify-center gap-2"
+              >
+                Lanjut ke WhatsApp
+                <MessageCircle className="h-4 w-4" />
+              </Button>
+            </DialogFooter>
+          }
+        >
+          <div className="rounded-md border bg-muted p-4 text-sm whitespace-pre-wrap text-muted-foreground">
+            {confirmation?.whatsappMessage}
+          </div>
+        </DialogFormContent>
       </Dialog>
     </div>
   )

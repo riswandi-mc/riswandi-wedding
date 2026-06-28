@@ -44,9 +44,11 @@ export function NavMain({
           const hasSubItems = item.items && item.items.length > 0;
           
           // Dynamically check if this item is active based on pathname
-          const isActive = item.url === "/dashboard"
-            ? pathname === "/dashboard"
-            : pathname.startsWith(item.url)
+          const isActive = hasSubItems
+            ? item.items?.some((subItem) => pathname === subItem.url || pathname.startsWith(`${subItem.url}/`))
+            : item.url === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname === item.url || pathname.startsWith(`${item.url}/`)
 
           if (!hasSubItems) {
             return (
@@ -78,15 +80,19 @@ export function NavMain({
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    {item.items?.map((subItem) => (
+                    {item.items?.map((subItem) => {
+                      const isSubActive = pathname === subItem.url || pathname.startsWith(`${subItem.url}/`)
+
+                      return (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild>
+                        <SidebarMenuSubButton asChild isActive={isSubActive}>
                           <a href={subItem.url}>
                             <span>{subItem.title}</span>
                           </a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
-                    ))}
+                      )
+                    })}
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>

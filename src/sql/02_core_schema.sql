@@ -238,5 +238,7 @@ drop trigger if exists calendar_events_set_updated_at on public.calendar_events;
 create trigger calendar_events_set_updated_at before update on public.calendar_events for each row execute function public.set_updated_at();
 
 insert into storage.buckets (id, name, public)
-values ('gallery', 'gallery', true)
+values
+  ('gallery', 'gallery', true),
+  ('invitation-template', 'invitation-template', true)
 on conflict (id) do update set public = excluded.public;

@@ -41,6 +41,10 @@ const data = {
       isActive: true,
       items: [
         {
+          title: "Konten Layanan",
+          url: "/dashboard/layanan-mc",
+        },
+        {
           title: "Booking MC",
           url: "/dashboard/booking-mc",
         },
@@ -61,7 +65,7 @@ const data = {
         },
         {
           title: "Katalog Template",
-          url: "#",
+          url: "/dashboard/template-undangan",
         },
       ],
     },
@@ -72,7 +76,7 @@ const data = {
       items: [
         {
           title: "Galeri Dokumentasi",
-          url: "#",
+          url: "/dashboard/galeri",
         },
         {
           title: "Testimoni",

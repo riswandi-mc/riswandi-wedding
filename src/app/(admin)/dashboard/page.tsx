@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, FileSpreadsheet, Images, Star, ArrowUpRight, MessageCircle } from "lucide-react";
 
 export default function DashboardPage() {
-  const [waNumber, setWaNumber] = useState(settingsData.phone);
+  const waNumber = settingsData.phone;
 
   // Mock recent activity data
   const [recentBookings] = useState([
