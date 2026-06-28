@@ -21,12 +21,10 @@ import {
   FileText,
   HelpCircle,
   Globe,
-  MoreHorizontal
+  MoreHorizontal,
+  Star,
 } from "lucide-react"
 
-
-
-// This is sample data.
 const data = {
   navMain: [
     {
@@ -80,7 +78,8 @@ const data = {
         },
         {
           title: "Testimoni",
-          url: "#",
+          url: "/dashboard/testimoni",
+          icon: <Star />,
         },
       ],
     },

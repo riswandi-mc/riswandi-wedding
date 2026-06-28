@@ -102,6 +102,18 @@ export function CalendarManager({ initialItems }: { initialItems: AdminCalendarI
   const startDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay()
   const mondayOffset = (startDay + 6) % 7
   const selectedItems = itemsByDate[selectedDate] ?? []
+  const summary = useMemo(() => {
+    const bookingCount = monthItems.filter((item) => item.event_kind === "mc_booking").length
+    const invitationCount = monthItems.filter((item) => item.event_kind === "invitation_order").length
+    const manualCount = monthItems.filter((item) => item.event_kind === "manual").length
+
+    return {
+      total: monthItems.length,
+      bookingCount,
+      invitationCount,
+      manualCount,
+    }
+  }, [monthItems])
 
   const openCreateDialog = () => {
     setForm({
@@ -184,6 +196,45 @@ export function CalendarManager({ initialItems }: { initialItems: AdminCalendarI
           <Button size="sm" className="gap-2 shadow-sm" onClick={openCreateDialog}>
             <Plus className="h-4 w-4" /> Tambah Event Manual
           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="bg-background shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Agenda Bulan Ini</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.total}</div>
+              <p className="text-xs text-muted-foreground">Semua agenda dari Supabase</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-background shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Booking MC</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.bookingCount}</div>
+              <p className="text-xs text-muted-foreground">Agenda booking MC</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-background shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Order Undangan</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.invitationCount}</div>
+              <p className="text-xs text-muted-foreground">Agenda order undangan</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-background shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Event Manual</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.manualCount}</div>
+              <p className="text-xs text-muted-foreground">Agenda tambahan admin</p>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

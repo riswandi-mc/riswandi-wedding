@@ -1,6 +1,6 @@
 "use client"
 
-import { useDeferredValue, useState, useTransition } from "react"
+import { useDeferredValue, useMemo, useState, useTransition } from "react"
 import { Edit3, EyeOff, Loader2, Plus, Search, Trash2 } from "lucide-react"
 
 import { createAdminFaq, deleteAdminFaq, updateAdminFaq } from "@/app/actions/admin"
@@ -40,6 +40,18 @@ export function FaqManager({ initialFaqs }: { initialFaqs: AdminFaq[] }) {
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  const summary = useMemo(() => {
+    const total = faqs.length
+    const active = faqs.filter((faq) => faq.is_active).length
+    const inactive = total - active
+
+    return {
+      total,
+      active,
+      inactive,
+    }
+  }, [faqs])
 
   const filteredFaqs = faqs.filter((faq) => {
     const query = deferredSearchTerm.trim().toLowerCase()
@@ -146,6 +158,36 @@ export function FaqManager({ initialFaqs }: { initialFaqs: AdminFaq[] }) {
           <Button onClick={openCreateDialog} className="gap-2 shadow-sm">
             <Plus className="h-4 w-4" /> Tambah FAQ
           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total FAQ</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.total}</div>
+              <p className="text-xs text-muted-foreground">Semua item di tabel `faqs`</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Aktif</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.active}</div>
+              <p className="text-xs text-muted-foreground">Tampil di landing page</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Nonaktif</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.inactive}</div>
+              <p className="text-xs text-muted-foreground">Disembunyikan dari publik</p>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="shadow-sm">

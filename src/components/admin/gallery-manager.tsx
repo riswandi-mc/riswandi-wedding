@@ -1,6 +1,6 @@
 "use client"
 
-import { useDeferredValue, useRef, useState, useTransition } from "react"
+import { useDeferredValue, useMemo, useRef, useState, useTransition } from "react"
 import Image from "next/image"
 import { Edit3, Image as ImageIcon, Loader2, Plus, Search, Trash2, Video } from "lucide-react"
 
@@ -51,6 +51,22 @@ export function GalleryManager({ initialItems }: { initialItems: AdminGalleryIte
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const summary = useMemo(() => {
+    const total = items.length
+    const active = items.filter((item) => item.is_active).length
+    const featured = items.filter((item) => item.is_active && item.is_featured).length
+    const images = items.filter((item) => item.media_type === "image").length
+    const videos = items.filter((item) => item.media_type === "video").length
+
+    return {
+      total,
+      active,
+      featured,
+      images,
+      videos,
+    }
+  }, [items])
 
   const filteredItems = items.filter((item) => {
     const query = deferredSearchTerm.trim().toLowerCase()
@@ -177,6 +193,44 @@ export function GalleryManager({ initialItems }: { initialItems: AdminGalleryIte
           <Button onClick={openCreateDialog} className="gap-2 shadow-sm">
             <Plus className="h-4 w-4" /> Tambah Media
           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <Card className="shadow-sm">
+            <CardContent className="py-5">
+              <div className="text-sm font-medium text-muted-foreground">Total Media</div>
+              <div className="mt-1 text-2xl font-bold">{summary.total}</div>
+              <p className="text-xs text-muted-foreground">Semua item galeri</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardContent className="py-5">
+              <div className="text-sm font-medium text-muted-foreground">Aktif</div>
+              <div className="mt-1 text-2xl font-bold">{summary.active}</div>
+              <p className="text-xs text-muted-foreground">Tampil di publik</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardContent className="py-5">
+              <div className="text-sm font-medium text-muted-foreground">Featured</div>
+              <div className="mt-1 text-2xl font-bold">{summary.featured}</div>
+              <p className="text-xs text-muted-foreground">Sorotan landing page</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardContent className="py-5">
+              <div className="text-sm font-medium text-muted-foreground">Foto</div>
+              <div className="mt-1 text-2xl font-bold">{summary.images}</div>
+              <p className="text-xs text-muted-foreground">Media bertipe image</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardContent className="py-5">
+              <div className="text-sm font-medium text-muted-foreground">Video</div>
+              <div className="mt-1 text-2xl font-bold">{summary.videos}</div>
+              <p className="text-xs text-muted-foreground">Media bertipe video</p>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="shadow-sm">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useDeferredValue, useState, useTransition } from "react"
+import { useDeferredValue, useMemo, useState, useTransition } from "react"
 import { format } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 import {
@@ -38,6 +38,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Badge } from "@/components/ui/badge"
+import { CardHeader, CardTitle } from "@/components/ui/card"
 import type {
   AdminInvitationOrder,
   AdminInvitationOrderStatus,
@@ -141,6 +142,21 @@ export function InvitationOrdersManager({
   const [isAddPending, startAddTransition] = useTransition()
   const [isRowPending, startRowTransition] = useTransition()
   const [pendingRowId, setPendingRowId] = useState<string | null>(null)
+
+  const summary = useMemo(() => {
+    const newCount = orders.filter((order) => order.status === "new").length
+    const inProgressCount = orders.filter((order) => order.status === "in_progress").length
+    const reviewCount = orders.filter((order) => order.status === "review").length
+    const doneCount = orders.filter((order) => order.status === "done").length
+
+    return {
+      total: orders.length,
+      newCount,
+      inProgressCount,
+      reviewCount,
+      doneCount,
+    }
+  }, [orders])
 
   const availableTemplates =
     templateOptions.length > 0
@@ -254,6 +270,54 @@ export function InvitationOrdersManager({
           <Button onClick={() => setIsAddOpen(true)} className="shadow-sm gap-2">
             <Plus className="w-4 h-4" /> Tambah Pesanan
           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Pesanan</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.total}</div>
+              <p className="text-xs text-muted-foreground">Semua order dari Supabase</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Baru</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.newCount}</div>
+              <p className="text-xs text-muted-foreground">Menunggu proses awal</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">In Progress</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.inProgressCount}</div>
+              <p className="text-xs text-muted-foreground">Sedang dikerjakan</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Review</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.reviewCount}</div>
+              <p className="text-xs text-muted-foreground">Menunggu cek akhir</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Selesai</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.doneCount}</div>
+              <p className="text-xs text-muted-foreground">Order yang sudah final</p>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="shadow-sm">
@@ -452,7 +516,7 @@ export function InvitationOrdersManager({
             <Label htmlFor="order-couple-name">Nama Mempelai</Label>
             <Input
               id="order-couple-name"
-              placeholder="Cth: Romeo & Juliet"
+              placeholder="Nama mempelai"
               value={newOrder.coupleName}
               onChange={(event) =>
                 setNewOrder((current) => ({
@@ -466,7 +530,7 @@ export function InvitationOrdersManager({
             <Label htmlFor="order-phone">Nomor WhatsApp</Label>
             <Input
               id="order-phone"
-              placeholder="Cth: 6281234567890"
+              placeholder="Nomor WA aktif, mis. 6281234567890"
               value={newOrder.phone}
               onChange={(event) =>
                 setNewOrder((current) => ({
@@ -508,7 +572,7 @@ export function InvitationOrdersManager({
             <Label htmlFor="order-location">Lokasi Acara</Label>
             <Input
               id="order-location"
-              placeholder="Cth: Gedung Aura Hall, Depok"
+              placeholder="Nama gedung atau lokasi acara"
               value={newOrder.eventLocation}
               onChange={(event) =>
                 setNewOrder((current) => ({
@@ -545,7 +609,7 @@ export function InvitationOrdersManager({
             ) : (
               <Input
                 id="order-template"
-                placeholder="Cth: Undangan 1 (Soft & Romantis)"
+                placeholder="Nama template yang digunakan"
                 value={newOrder.templateName}
                 onChange={(event) =>
                   setNewOrder((current) => ({

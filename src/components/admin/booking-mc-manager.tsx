@@ -1,7 +1,7 @@
 "use client"
 
-import { useDeferredValue, useState, useTransition } from "react"
-import { format } from "date-fns"
+import { useDeferredValue, useMemo, useState, useTransition } from "react"
+import { format, startOfDay } from "date-fns"
 import { id as localeId } from "date-fns/locale"
 import {
   AlertCircle,
@@ -37,6 +37,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Badge } from "@/components/ui/badge"
+import { CardHeader, CardTitle } from "@/components/ui/card"
 import type { AdminBooking, AdminBookingStatus, McServiceOption } from "@/lib/data/admin"
 
 const bookingStatusOptions: Array<{
@@ -124,6 +125,22 @@ export function BookingMcManager({
   const [isAddPending, startAddTransition] = useTransition()
   const [isRowPending, startRowTransition] = useTransition()
   const [pendingRowId, setPendingRowId] = useState<string | null>(null)
+
+  const summary = useMemo(() => {
+    const todayStart = startOfDay(new Date())
+    const pending = bookings.filter((booking) => booking.status === "pending").length
+    const followedUp = bookings.filter((booking) => booking.status === "followed_up").length
+    const deal = bookings.filter((booking) => booking.status === "deal").length
+    const upcoming = bookings.filter((booking) => new Date(`${booking.event_date}T00:00:00`) >= todayStart).length
+
+    return {
+      total: bookings.length,
+      pending,
+      followedUp,
+      deal,
+      upcoming,
+    }
+  }, [bookings])
 
   const availableServices =
     serviceOptions.length > 0
@@ -238,6 +255,54 @@ export function BookingMcManager({
           <Button onClick={() => setIsAddOpen(true)} className="shadow-sm gap-2">
             <Plus className="w-4 h-4" /> Tambah Booking
           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Booking</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.total}</div>
+              <p className="text-xs text-muted-foreground">Semua booking dari Supabase</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.pending}</div>
+              <p className="text-xs text-muted-foreground">Menunggu follow up</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Followed Up</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.followedUp}</div>
+              <p className="text-xs text-muted-foreground">Sudah dihubungi</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Deal</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.deal}</div>
+              <p className="text-xs text-muted-foreground">Booking yang berhasil</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Acara Mendatang</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.upcoming}</div>
+              <p className="text-xs text-muted-foreground">Tanggal acara hari ini ke depan</p>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="shadow-sm">
@@ -429,7 +494,7 @@ export function BookingMcManager({
             <Label htmlFor="booking-client-name">Nama Klien</Label>
             <Input
               id="booking-client-name"
-              placeholder="Cth: Budi & Rina"
+              placeholder="Nama klien atau pasangan"
               value={newBooking.clientName}
               onChange={(event) =>
                 setNewBooking((current) => ({
@@ -443,7 +508,7 @@ export function BookingMcManager({
             <Label htmlFor="booking-phone">Nomor WhatsApp</Label>
             <Input
               id="booking-phone"
-              placeholder="Cth: 6281234567890"
+              placeholder="Nomor WA aktif, mis. 6281234567890"
               value={newBooking.phone}
               onChange={(event) =>
                 setNewBooking((current) => ({
@@ -494,7 +559,7 @@ export function BookingMcManager({
             ) : (
               <Input
                 id="booking-service"
-                placeholder="Cth: MC Wedding Private"
+                placeholder="Nama layanan yang digunakan"
                 value={newBooking.serviceName}
                 onChange={(event) =>
                   setNewBooking((current) => ({

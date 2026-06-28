@@ -1,6 +1,6 @@
 "use client"
 
-import { useDeferredValue, useState, useTransition } from "react"
+import { useDeferredValue, useMemo, useState, useTransition } from "react"
 import { CheckCircle, Edit3, Loader2, Plus, Search, Trash2 } from "lucide-react"
 
 import {
@@ -72,6 +72,20 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  const summary = useMemo(() => {
+    const total = services.length
+    const active = services.filter((service) => service.is_active).length
+    const featured = services.filter((service) => service.is_active && service.is_featured).length
+    const visibleLanding = services.filter((service) => service.is_active).slice(0, 3).length
+
+    return {
+      total,
+      active,
+      featured,
+      visibleLanding,
+    }
+  }, [services])
 
   const filteredServices = services.filter((service) => {
     const query = deferredSearchTerm.trim().toLowerCase()
@@ -197,6 +211,45 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
           <Button onClick={openCreateDialog} className="gap-2 shadow-sm">
             <Plus className="h-4 w-4" /> Tambah Layanan
           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Layanan</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.total}</div>
+              <p className="text-xs text-muted-foreground">Semua layanan di Supabase</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Aktif</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.active}</div>
+              <p className="text-xs text-muted-foreground">Tampil di landing page</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Featured</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.featured}</div>
+              <p className="text-xs text-muted-foreground">Layanan unggulan aktif</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Landing Preview</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.visibleLanding}</div>
+              <p className="text-xs text-muted-foreground">Top 3 aktif teratas</p>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="shadow-sm">
@@ -360,7 +413,7 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="service-badge-label">Label Badge</Label>
-              <Input id="service-badge-label" placeholder="Cth: Populer" value={form.badgeLabel} onChange={(event) => setForm((current) => ({ ...current, badgeLabel: event.target.value }))} />
+              <Input id="service-badge-label" placeholder="Label sorotan, mis. Populer" value={form.badgeLabel} onChange={(event) => setForm((current) => ({ ...current, badgeLabel: event.target.value }))} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="service-badge-variant">Variant Badge</Label>

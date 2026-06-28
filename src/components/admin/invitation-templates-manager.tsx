@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useTransition } from "react"
+import { useMemo, useRef, useState, useTransition } from "react"
 import Image from "next/image"
 import { Edit2, Eye, Loader2, Plus, Trash2 } from "lucide-react"
 
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogFooter, DialogFormContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -67,6 +67,20 @@ export function InvitationTemplatesManager({
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const previewFileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const summary = useMemo(() => {
+    const total = templates.length
+    const active = templates.filter((template) => template.is_active).length
+    const demoReady = templates.filter((template) => template.is_demo_ready).length
+    const previewReady = templates.filter((template) => Boolean(template.preview_image_url)).length
+
+    return {
+      total,
+      active,
+      demoReady,
+      previewReady,
+    }
+  }, [templates])
 
   const openCreateDialog = () => {
     setForm({
@@ -196,6 +210,45 @@ export function InvitationTemplatesManager({
           <Button onClick={openCreateDialog} className="gap-2 shadow-sm">
             <Plus className="h-4 w-4" /> Tambah Template
           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Template</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.total}</div>
+              <p className="text-xs text-muted-foreground">Semua template di Supabase</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Aktif</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.active}</div>
+              <p className="text-xs text-muted-foreground">Muncul di landing page</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Demo Siap</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.demoReady}</div>
+              <p className="text-xs text-muted-foreground">Bisa dibuka dari tombol demo</p>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Preview Tersedia</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="text-2xl font-bold">{summary.previewReady}</div>
+              <p className="text-xs text-muted-foreground">Punya gambar preview</p>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

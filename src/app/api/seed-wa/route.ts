@@ -5,7 +5,7 @@ export async function POST() {
     {
       success: false,
       message:
-        "Route ini sudah dinonaktifkan. Nomor WhatsApp sekarang dikelola lewat Supabase, bukan Firebase.",
+        "Route ini sudah dinonaktifkan. Nomor WhatsApp sekarang dikelola lewat Supabase.",
     },
     { status: 410 }
   )
