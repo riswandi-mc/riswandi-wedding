@@ -544,6 +544,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070&auto=format&fit=crop"
               alt="Wedding Event"
               fill
+              sizes="100vw"
               className="object-cover brightness-50"
               priority
             />
@@ -901,6 +902,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                                     }
                                     alt={testimonial.client_name}
                                     fill
+                                    sizes="80px"
                                     className="object-cover"
                                   />
                                 ) : (
@@ -994,6 +996,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       src={getGalleryPreview(item)}
                       alt={item.title}
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 via-transparent to-transparent p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
@@ -1134,12 +1137,24 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <div className="flex flex-col gap-4 text-[15px] text-white/60">
               <div className="flex items-start gap-3">
                 <Phone className="mt-0.5 h-5 w-5 shrink-0" />
-                <span>+{waNumber}</span>
+                <a
+                  href={buildWhatsAppUrl(waNumber, getGeneralQuestionMessage())}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-white"
+                >
+                  +{waNumber}
+                </a>
               </div>
               {email ? (
                 <div className="flex items-start gap-3">
                   <Mail className="mt-0.5 h-5 w-5 shrink-0" />
-                  <span>{email}</span>
+                  <a
+                    href={`mailto:${email}`}
+                    className="transition-colors hover:text-white"
+                  >
+                    {email}
+                  </a>
                 </div>
               ) : null}
               <div className="flex items-start gap-3">

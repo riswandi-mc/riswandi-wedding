@@ -418,6 +418,27 @@ function normalizeOptional(value?: string) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function normalizeWhatsAppPhone(value?: string) {
+  const normalized = normalizeOptional(value);
+
+  if (!normalized) {
+    return null;
+  }
+
+  const digits = normalized.replace(/[^\d]/g, "");
+  const phone = digits.startsWith("00") ? digits.slice(2) : digits;
+
+  if (phone.startsWith("0")) {
+    return `62${phone.slice(1)}`;
+  }
+
+  if (phone.startsWith("8")) {
+    return `62${phone}`;
+  }
+
+  return phone;
+}
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -1976,7 +1997,7 @@ export async function createMcBooking(
     .from("mc_bookings")
     .insert({
       client_name: parsed.data.clientName,
-      phone: normalizeOptional(parsed.data.phone),
+      phone: normalizeWhatsAppPhone(parsed.data.phone),
       event_date: parsed.data.eventDate,
       event_location: normalizeOptional(parsed.data.eventLocation),
       service_id: service?.id ?? null,

@@ -383,6 +383,7 @@ export function TestimonialManager({
                                 }
                                 alt={testimonial.client_name}
                                 fill
+                                sizes="64px"
                                 className="object-cover"
                               />
                             ) : (
@@ -581,6 +582,7 @@ export function TestimonialManager({
                   src={formPhotoSrc}
                   alt={form.clientName || "Foto testimoni"}
                   fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
                 />
               </div>

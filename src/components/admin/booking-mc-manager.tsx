@@ -98,10 +98,29 @@ function buildWhatsappLink(booking: AdminBooking) {
     return null
   }
 
-  const phone = booking.phone.replace(/[^\d]/g, "")
+  const phone = normalizeWhatsappNumber(booking.phone)
+  if (!phone) {
+    return null
+  }
+
   const message = `Halo Kak ${booking.client_name}, saya Riswandi. Saya follow up booking MC untuk acara tanggal ${formatDisplayDate(booking.event_date)}. Mohon kabar lanjutannya ya.`
 
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+}
+
+function normalizeWhatsappNumber(value: string) {
+  const digits = value.replace(/[^\d]/g, "")
+  const phone = digits.startsWith("00") ? digits.slice(2) : digits
+
+  if (phone.startsWith("0")) {
+    return `62${phone.slice(1)}`
+  }
+
+  if (phone.startsWith("8")) {
+    return `62${phone}`
+  }
+
+  return phone
 }
 
 export function BookingMcManager({
@@ -395,15 +414,16 @@ export function BookingMcManager({
                             }
                             disabled={isPendingRow}
                           >
-                            <SelectTrigger className="w-[150px] h-9 text-xs">
-                              <div className="flex items-center gap-2">
-                                {isPendingRow ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <StatusIcon className="h-3.5 w-3.5" />
-                                )}
-                                <span>{statusMeta.label}</span>
-                              </div>
+                            <SelectTrigger
+                              className="h-9 w-[150px] text-xs"
+                              aria-label={`Status booking: ${statusMeta.label}`}
+                            >
+                              {isPendingRow ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <StatusIcon className="h-3.5 w-3.5" />
+                              )}
+                              <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               {bookingStatusOptions.map((status) => (

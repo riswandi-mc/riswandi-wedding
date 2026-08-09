@@ -1,0 +1,50 @@
+morewans6@gmail.com
+@05sep2002
+
+🌸 Daftar Template Undangan Pernikahan Digital
+🌸 w-1-pink
+
+GitHub: https://github.com/sandhikagalih/dino-wedding
+
+Demo: https://azzam-azhari.github.io/wedding-invitation/
+
+
+🖤 w-3-dark
+
+GitHub: https://github.com/dewanakl/undangan
+
+💙 w-4-blue
+
+GitHub: https://github.com/NgodingSolusi/the-wedding-of-rehan-maulidan
+
+Demo: https://ngodingsolusi.github.io/the-wedding-of-rehan-maulidan/
+
+✨ w-5-simple
+
+GitHub: https://github.com/sakeenah-wedding/template
+
+Demo: https://invitation.sakeenah.site/
+
+💐 w-6-bunga
+
+GitHub: https://github.com/Zaputlah/undangan-digital
+
+Demo: https://undangan-digital-pied.vercel.app/
+
+📜 w-7-undangan
+
+GitHub: https://github.com/raflyazwar/undangan-pernikahan
+
+Demo: https://undangan-pernikahan-online.netlify.app/
+
+🎨 w-8-sass
+
+GitHub: https://github.com/T-faces/The-wedding-of-Ari-dan-Nisa
+
+Demo: https://t-faces.github.io/The-wedding-of-Ari-dan-Nisa/
+
+⚡ w-9-vue
+
+GitHub: https://github.com/alystrastudio/Love-in-Motion
+
+Demo: https://alystrastudio.github.io/Love-in-Motion/
