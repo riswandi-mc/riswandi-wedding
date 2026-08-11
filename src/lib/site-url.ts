@@ -13,9 +13,10 @@ function getVercelProductionUrl() {
 }
 
 export function getSiteUrl() {
+  const vercelProductionUrl = getVercelProductionUrl()
   const configuredUrl =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    getVercelProductionUrl() ||
+    vercelProductionUrl ||
     LOCAL_SITE_URL
 
   let siteUrl: URL
@@ -26,6 +27,16 @@ export function getSiteUrl() {
     throw new Error(
       "NEXT_PUBLIC_SITE_URL harus berupa origin URL yang valid, misalnya https://riswandiwedding.com.",
     )
+  }
+
+  if (process.env.VERCEL_ENV === "production" && isLocalHostname(siteUrl.hostname)) {
+    if (!vercelProductionUrl) {
+      throw new Error(
+        "NEXT_PUBLIC_SITE_URL production wajib diisi dengan domain final HTTPS.",
+      )
+    }
+
+    siteUrl = new URL(vercelProductionUrl)
   }
 
   if (!isLocalHostname(siteUrl.hostname) && siteUrl.protocol !== "https:") {
@@ -41,12 +52,6 @@ export function getSiteUrl() {
   ) {
     throw new Error(
       "NEXT_PUBLIC_SITE_URL harus berupa origin tanpa path, query, hash, atau kredensial.",
-    )
-  }
-
-  if (process.env.VERCEL_ENV === "production" && isLocalHostname(siteUrl.hostname)) {
-    throw new Error(
-      "NEXT_PUBLIC_SITE_URL production wajib diisi dengan domain final HTTPS.",
     )
   }
 
