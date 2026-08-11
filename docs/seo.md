@@ -226,5 +226,5 @@ Status audit terakhir: **11 Agustus 2026**.
 
 - [x] File `.env*`, `.vercel`, `.insforge`, private key, dan build output diabaikan Git.
 - [x] Token verifikasi/analytics dapat diberikan melalui environment dan tidak perlu di-commit.
-- [ ] **MANUAL —** Simpan nilai environment berbeda untuk local, preview, dan production di dashboard hosting.
+- [✅] **MANUAL —** Simpan nilai environment berbeda untuk local, preview, dan production di dashboard hosting.
 - [ ] **MANUAL —** Rotasi secret segera bila pernah terpublikasi di commit, log, screenshot, atau chat.

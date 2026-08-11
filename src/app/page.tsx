@@ -8,6 +8,8 @@ import { createPublicPageMetadata, SITE_DESCRIPTION, SITE_TITLE } from "@/lib/se
 import { getSiteOrigin } from "@/lib/site-url"
 import { createHomeJsonLd } from "@/lib/structured-data"
 
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = createPublicPageMetadata({
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,

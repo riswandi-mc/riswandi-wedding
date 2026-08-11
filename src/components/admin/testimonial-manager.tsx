@@ -42,11 +42,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogFooter,
-  DialogFormContent,
-} from "@/components/ui/dialog";
+import { DialogFooter } from "@/components/ui/dialog";
+import { Popup } from "@/components/ui/popup";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -110,6 +107,7 @@ export function TestimonialManager({
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const photoFileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -231,15 +229,12 @@ export function TestimonialManager({
     });
   };
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus testimoni ini?")) {
-      return;
-    }
-
+  const confirmDelete = (id: string) => {
     setPendingId(id);
     startTransition(async () => {
       const result = await deleteAdminTestimonial({ id });
       setPendingId(null);
+      setDeleteId(null);
 
       if (!result.ok) {
         alert(result.error);
@@ -250,6 +245,10 @@ export function TestimonialManager({
         current.filter((testimonial) => testimonial.id !== id),
       );
     });
+  };
+
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
   };
 
   return (
@@ -507,13 +506,13 @@ export function TestimonialManager({
         </div>
       </main>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogFormContent
-          className="sm:max-w-[560px]"
-          title={form.id ? "Sunting Testimoni" : "Tambah Testimoni"}
-          description="Data disimpan ke tabel `testimonials` di Supabase."
-          bodyClassName="grid gap-4"
-          footer={
+      <Popup
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        className="sm:max-w-[560px]"
+        title={form.id ? "Sunting Testimoni" : "Tambah Testimoni"}
+        description="Data disimpan ke tabel `testimonials` di Supabase."
+        footer={
             <DialogFooter>
               <Button
                 variant="outline"
@@ -680,8 +679,26 @@ export function TestimonialManager({
               Verified
             </label>
           </div>
-        </DialogFormContent>
-      </Dialog>
+        </Popup>
+
+      <Popup
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        className="sm:max-w-[420px]"
+        title="Konfirmasi Hapus"
+        description="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan."
+        footer={
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={isPending}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={() => deleteId && confirmDelete(deleteId)} disabled={isPending}>
+              {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Hapus
+            </Button>
+          </DialogFooter>
+        }
+      />
     </div>
   );
 }

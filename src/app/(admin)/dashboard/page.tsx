@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { format, isAfter, startOfMonth, subDays, addMonths } from "date-fns"
 import { id as indonesianLocale } from "date-fns/locale"
 import {

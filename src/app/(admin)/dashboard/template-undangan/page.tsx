@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { InvitationTemplatesManager } from "@/components/admin/invitation-templates-manager"
 import { listAdminInvitationTemplates } from "@/lib/data/admin"
 

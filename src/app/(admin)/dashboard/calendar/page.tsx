@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { CalendarManager } from "@/components/admin/calendar-manager"
 import { listAdminCalendarItems } from "@/lib/data/admin"
 

@@ -21,7 +21,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent } from "@/components/ui/card"
-import { Dialog, DialogFooter, DialogFormContent } from "@/components/ui/dialog"
+import { DialogFooter } from "@/components/ui/dialog"
+import { Popup } from "@/components/ui/popup"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -50,6 +51,7 @@ export function GalleryManager({ initialItems }: { initialItems: AdminGalleryIte
   const [form, setForm] = useState(emptyForm)
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingId, setPendingId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -144,15 +146,12 @@ export function GalleryManager({ initialItems }: { initialItems: AdminGalleryIte
     })
   }
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus media ini?")) {
-      return
-    }
-
+  const confirmDelete = (id: string) => {
     setPendingId(id)
     startTransition(async () => {
       const result = await deleteAdminGalleryItem({ id })
       setPendingId(null)
+      setDeleteId(null)
 
       if (!result.ok) {
         alert(result.error)
@@ -161,6 +160,10 @@ export function GalleryManager({ initialItems }: { initialItems: AdminGalleryIte
 
       setItems((current) => current.filter((item) => item.id !== id))
     })
+  }
+
+  const handleDelete = (id: string) => {
+    setDeleteId(id)
   }
 
   return (
@@ -331,13 +334,13 @@ export function GalleryManager({ initialItems }: { initialItems: AdminGalleryIte
         </div>
       </main>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogFormContent
-          className="sm:max-w-[500px]"
-          title={form.id ? "Edit Dokumentasi Galeri" : "Tambah Dokumentasi Galeri"}
-          description={form.id ? "Ubah metadata galeri." : "Pilih file dan isi metadata untuk galeri landing page."}
-          bodyClassName="grid gap-4"
-          footer={
+      <Popup
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        className="sm:max-w-[500px]"
+        title={form.id ? "Edit Dokumentasi Galeri" : "Tambah Dokumentasi Galeri"}
+        description={form.id ? "Ubah metadata galeri." : "Pilih file dan isi metadata untuk galeri landing page."}
+        footer={
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isPending}>
                 Batal
@@ -404,8 +407,26 @@ export function GalleryManager({ initialItems }: { initialItems: AdminGalleryIte
               </label>
             </div>
           </div>
-        </DialogFormContent>
-      </Dialog>
+        </Popup>
+
+      <Popup
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        className="sm:max-w-[420px]"
+        title="Konfirmasi Hapus"
+        description="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan."
+        footer={
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={isPending}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={() => deleteId && confirmDelete(deleteId)} disabled={isPending}>
+              {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Hapus
+            </Button>
+          </DialogFooter>
+        }
+      />
     </div>
   )
 }

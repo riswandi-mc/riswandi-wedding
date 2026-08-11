@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { FaqManager } from "@/components/admin/faq-manager"
 import { listAdminFaqs } from "@/lib/data/admin"
 

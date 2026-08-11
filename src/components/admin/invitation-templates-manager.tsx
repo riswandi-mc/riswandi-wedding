@@ -21,7 +21,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogFooter, DialogFormContent } from "@/components/ui/dialog"
+import { DialogFooter } from "@/components/ui/dialog"
+import { Popup } from "@/components/ui/popup"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
@@ -66,6 +67,7 @@ export function InvitationTemplatesManager({
   const [form, setForm] = useState(emptyForm)
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingId, setPendingId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const previewFileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -161,15 +163,12 @@ export function InvitationTemplatesManager({
     })
   }
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus template ini?")) {
-      return
-    }
-
+  const confirmDelete = (id: string) => {
     setPendingId(id)
     startTransition(async () => {
       const result = await deleteAdminInvitationTemplate({ id })
       setPendingId(null)
+      setDeleteId(null)
 
       if (!result.ok) {
         alert(result.error)
@@ -178,6 +177,10 @@ export function InvitationTemplatesManager({
 
       setTemplates((current) => current.filter((template) => template.id !== id))
     })
+  }
+
+  const handleDelete = (id: string) => {
+    setDeleteId(id)
   }
 
   return (
@@ -320,13 +323,13 @@ export function InvitationTemplatesManager({
         </div>
       </main>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogFormContent
-          className="sm:max-w-[560px]"
-          title={form.id ? "Edit Template Undangan" : "Tambah Template Undangan"}
-          description="Ubah konfigurasi template yang tampil di landing page."
-          bodyClassName="grid gap-4"
-          footer={
+      <Popup
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        className="sm:max-w-[560px]"
+        title={form.id ? "Edit Template Undangan" : "Tambah Template Undangan"}
+        description="Ubah konfigurasi template yang tampil di landing page."
+        footer={
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isPending}>
                 Batal
@@ -396,8 +399,26 @@ export function InvitationTemplatesManager({
               Demo siap dibuka
             </label>
           </div>
-        </DialogFormContent>
-      </Dialog>
+        </Popup>
+
+      <Popup
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        className="sm:max-w-[420px]"
+        title="Konfirmasi Hapus"
+        description="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan."
+        footer={
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={isPending}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={() => deleteId && confirmDelete(deleteId)} disabled={isPending}>
+              {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Hapus
+            </Button>
+          </DialogFooter>
+        }
+      />
     </div>
   )
 }

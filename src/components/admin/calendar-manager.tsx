@@ -28,7 +28,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogFooter, DialogFormContent } from "@/components/ui/dialog"
+import { DialogFooter } from "@/components/ui/dialog"
+import { Popup } from "@/components/ui/popup"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -79,6 +80,7 @@ export function CalendarManager({ initialItems }: { initialItems: AdminCalendarI
   const [form, setForm] = useState(emptyForm)
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingId, setPendingId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const monthItems = useMemo(() => {
@@ -143,15 +145,12 @@ export function CalendarManager({ initialItems }: { initialItems: AdminCalendarI
     })
   }
 
-  const handleDeleteManual = (id: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus event manual ini?")) {
-      return
-    }
-
+  const confirmDeleteManual = (id: string) => {
     setPendingId(id)
     startTransition(async () => {
       const result = await deleteAdminManualCalendarEvent({ id })
       setPendingId(null)
+      setDeleteId(null)
 
       if (!result.ok) {
         alert(result.error)
@@ -160,6 +159,10 @@ export function CalendarManager({ initialItems }: { initialItems: AdminCalendarI
 
       setItems((current) => current.filter((item) => item.id !== id))
     })
+  }
+
+  const handleDeleteManual = (id: string) => {
+    setDeleteId(id)
   }
 
   const moveMonth = (offset: number) => {
@@ -374,13 +377,13 @@ export function CalendarManager({ initialItems }: { initialItems: AdminCalendarI
         </div>
       </main>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogFormContent
-          className="sm:max-w-[480px]"
-          title="Tambah Event Manual"
-          description="Event manual akan muncul bersama booking dan order."
-          bodyClassName="grid gap-4"
-          footer={
+      <Popup
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        className="sm:max-w-[480px]"
+        title="Tambah Event Manual"
+        description="Event manual akan muncul bersama booking dan order."
+        footer={
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isPending}>
                 Batal
@@ -421,8 +424,26 @@ export function CalendarManager({ initialItems }: { initialItems: AdminCalendarI
               onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
             />
           </div>
-        </DialogFormContent>
-      </Dialog>
+        </Popup>
+
+      <Popup
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        className="sm:max-w-[420px]"
+        title="Konfirmasi Hapus"
+        description="Apakah Anda yakin ingin menghapus event manual ini? Tindakan ini tidak dapat dibatalkan."
+        footer={
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={isPending}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={() => deleteId && confirmDeleteManual(deleteId)} disabled={isPending}>
+              {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Hapus
+            </Button>
+          </DialogFooter>
+        }
+      />
     </div>
   )
 }

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import { WebsiteSettingsManager } from "@/components/admin/website-settings-manager";
 import { getAdminSession, getAdminWebsiteSettings } from "@/lib/data/admin";
 

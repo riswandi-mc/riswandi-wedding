@@ -20,7 +20,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogFooter, DialogFormContent } from "@/components/ui/dialog"
+import { DialogFooter } from "@/components/ui/dialog"
+import { Popup } from "@/components/ui/popup"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -73,6 +74,7 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
   const [form, setForm] = useState(emptyForm)
   const [formError, setFormError] = useState<string | null>(null)
   const [pendingId, setPendingId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const summary = useMemo(() => {
@@ -163,15 +165,12 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
     })
   }
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus layanan MC ini?")) {
-      return
-    }
-
+  const confirmDelete = (id: string) => {
     setPendingId(id)
     startTransition(async () => {
       const result = await deleteAdminMcService({ id })
       setPendingId(null)
+      setDeleteId(null)
 
       if (!result.ok) {
         alert(result.error)
@@ -180,6 +179,10 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
 
       setServices((current) => current.filter((service) => service.id !== id))
     })
+  }
+
+  const handleDelete = (id: string) => {
+    setDeleteId(id)
   }
 
   return (
@@ -368,13 +371,13 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
         </div>
       </main>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogFormContent
-          className="sm:max-w-[560px]"
-          title={form.id ? "Edit Layanan MC" : "Tambah Layanan MC"}
-          description="Konten aktif akan tampil di halaman publik sesuai urutan."
-          bodyClassName="grid gap-4"
-          footer={
+      <Popup
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        className="sm:max-w-[560px]"
+        title={form.id ? "Edit Layanan MC" : "Tambah Layanan MC"}
+        description="Konten aktif akan tampil di halaman publik sesuai urutan."
+        footer={
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isPending}>
                 Batal
@@ -438,8 +441,26 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
               </label>
             </div>
           </div>
-        </DialogFormContent>
-      </Dialog>
+        </Popup>
+
+      <Popup
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        className="sm:max-w-[420px]"
+        title="Konfirmasi Hapus"
+        description="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan."
+        footer={
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={isPending}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={() => deleteId && confirmDelete(deleteId)} disabled={isPending}>
+              {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Hapus
+            </Button>
+          </DialogFooter>
+        }
+      />
     </div>
   )
 }

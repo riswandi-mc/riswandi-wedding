@@ -30,7 +30,8 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Dialog, DialogFooter, DialogFormContent } from "@/components/ui/dialog"
+import { DialogFooter } from "@/components/ui/dialog"
+import { Popup } from "@/components/ui/popup"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -145,6 +146,7 @@ export function BookingMcManager({
   const [isAddPending, startAddTransition] = useTransition()
   const [isRowPending, startRowTransition] = useTransition()
   const [pendingRowId, setPendingRowId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const summary = useMemo(() => {
     const todayStart = startOfDay(new Date())
@@ -224,16 +226,13 @@ export function BookingMcManager({
     })
   }
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus data booking ini?")) {
-      return
-    }
-
+  const confirmDelete = (id: string) => {
     setPendingRowId(id)
 
     startRowTransition(async () => {
       const result = await deleteAdminMcBooking({ id })
       setPendingRowId(null)
+      setDeleteId(null)
 
       if (!result.ok) {
         alert(result.error)
@@ -242,6 +241,10 @@ export function BookingMcManager({
 
       setBookings((current) => current.filter((booking) => booking.id !== id))
     })
+  }
+
+  const handleDelete = (id: string) => {
+    setDeleteId(id)
   }
 
   return (
@@ -483,13 +486,13 @@ export function BookingMcManager({
         </Card>
       </main>
 
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogFormContent
-          className="sm:max-w-[520px]"
-          title="Tambah Data Booking MC"
-          description="Input manual ini langsung disimpan ke Supabase dan memakai tabel yang sama dengan form publik."
-          bodyClassName="grid gap-4"
-          footer={
+      <Popup
+        open={isAddOpen}
+        onOpenChange={setIsAddOpen}
+        className="sm:max-w-[520px]"
+        title="Tambah Data Booking MC"
+        description="Input manual ini langsung disimpan ke Supabase dan memakai tabel yang sama dengan form publik."
+        footer={
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddOpen(false)} disabled={isAddPending}>
                 Batal
@@ -644,8 +647,26 @@ export function BookingMcManager({
               }
             />
           </div>
-        </DialogFormContent>
-      </Dialog>
+        </Popup>
+
+      <Popup
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        className="sm:max-w-[420px]"
+        title="Konfirmasi Hapus"
+        description="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan."
+        footer={
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)} disabled={isRowPending}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={() => deleteId && confirmDelete(deleteId)} disabled={isRowPending}>
+              {isRowPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Hapus
+            </Button>
+          </DialogFooter>
+        }
+      />
     </div>
   )
 }

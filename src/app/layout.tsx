@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import type { Metadata } from "next";
 import { Geist, EB_Garamond } from "next/font/google";
 import "./globals.css";
@@ -10,6 +12,8 @@ import {
   SITE_NAME,
   SITE_TITLE,
 } from "@/lib/seo";
+import { RootClientLayout } from "@/components/root-client-layout";
+import { getPublicHomepageData } from "@/lib/data/public";
 
 const displayFont = EB_Garamond({
   subsets: ["latin"],
@@ -41,11 +45,13 @@ export const metadata: Metadata = {
     : undefined,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const data = await getPublicHomepageData();
+
   return (
     <html
       lang="id"
@@ -54,7 +60,9 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col font-sans">
         <TooltipProvider>
-          {children}
+          <RootClientLayout settings={data.settings}>
+            {children}
+          </RootClientLayout>
         </TooltipProvider>
       </body>
     </html>
