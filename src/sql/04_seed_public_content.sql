@@ -45,13 +45,13 @@ on conflict (slug) do update set
 insert into public.invitation_templates (slug, name, theme, original_price, promo_price, demo_url, img_sig, min_order_days, sort_order, is_active, is_demo_ready)
 values
   ('undangan-1-soft-romantis', 'Undangan 1 (Soft & Romantis)', 'Soft & Romantis', 59000, 39000, 'https://azzam-azhari.github.io/wedding-invitation/', 101, 7, 1, true, true),
-  ('undangan-2-modern-aesthetic-dark', 'Undangan 2 (Modern / Aesthetic Dark)', 'Modern / Aesthetic Dark', 59000, 39000, '#', 102, 7, 2, true, false),
+  ('undangan-2-modern-aesthetic-dark', 'Undangan 2 (Modern / Aesthetic Dark)', 'Modern / Aesthetic Dark', 59000, 39000, null, 102, 7, 2, true, false),
   ('undangan-3-fresh-premium', 'Undangan 3 (Fresh & Premium)', 'Fresh & Premium', 59000, 39000, 'https://ngodingsolusi.github.io/the-wedding-of-rehan-maulidan/', 103, 7, 3, true, true),
   ('undangan-4-minimalis-elegan', 'Undangan 4 (Minimalis & Elegan)', 'Minimalis & Elegan', 59000, 39000, 'https://invitation.sakeenah.site/', 104, 7, 4, true, true),
   ('undangan-5-floral-botanical', 'Undangan 5 (Floral / Botanical)', 'Floral / Botanical', 59000, 39000, 'https://undangan-digital-pied.vercel.app/', 105, 7, 5, true, true),
   ('undangan-6-klasik-clean', 'Undangan 6 (Klasik & Clean)', 'Klasik & Clean', 59000, 39000, 'https://undangan-pernikahan-online.netlify.app/', 106, 7, 6, true, true),
   ('undangan-7-stylish-luxury', 'Undangan 7 (Stylish & Luxury)', 'Stylish & Luxury', 59000, 39000, 'https://t-faces.github.io/The-wedding-of-Ari-dan-Nisa/', 107, 7, 7, true, true),
-  ('undangan-8-exclusive-smooth-animation', 'Undangan 8 (Exclusive & Smooth Animation)', 'Exclusive & Smooth Animation', 59000, 39000, 'https://alystrastudio.github.io/Love-in-Motion/', 108, 7, 8, true, true)
+  ('undangan-8-exclusive-smooth-animation', 'Undangan 8 (Exclusive & Smooth Animation)', 'Exclusive & Smooth Animation', 59000, 39000, null, 108, 7, 8, true, false)
 on conflict (slug) do update set
   name = excluded.name,
   theme = excluded.theme,

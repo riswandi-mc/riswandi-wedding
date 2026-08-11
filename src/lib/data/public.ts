@@ -1,9 +1,11 @@
 import "server-only"
 
 import { cache } from "react"
+import { unstable_cache } from "next/cache"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { z } from "zod"
 
-import { createClient } from "@/lib/supabase/server"
+import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase/env"
 
 const publicSettingsSchema = z.object({
   brand_name: z.string(),
@@ -89,22 +91,43 @@ export const emptyPublicHomepageData: PublicHomepageData = {
   testimonials: [],
 }
 
-export const getPublicHomepageData = cache(async (): Promise<PublicHomepageData> => {
-  const supabase = await createClient()
-  const { data, error } = await supabase.rpc("get_public_homepage")
+async function fetchPublicHomepageData(): Promise<PublicHomepageData> {
+  try {
+    const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    })
+    const { data, error } = await supabase.rpc("get_public_homepage")
 
-  if (error || !data) {
+    if (error || !data) {
+      return emptyPublicHomepageData
+    }
+
+    const parsed = publicHomepageSchema.safeParse(data)
+
+    if (!parsed.success) {
+      return emptyPublicHomepageData
+    }
+
+    return parsed.data
+  } catch {
     return emptyPublicHomepageData
   }
+}
 
-  const parsed = publicHomepageSchema.safeParse(data)
+const getCachedPublicHomepageData = unstable_cache(
+  fetchPublicHomepageData,
+  ["public-homepage-v1"],
+  {
+    tags: ["public-homepage"],
+    revalidate: 300,
+  },
+)
 
-  if (!parsed.success) {
-    return emptyPublicHomepageData
-  }
-
-  return parsed.data
-})
+export const getPublicHomepageData = cache(getCachedPublicHomepageData)
 
 export const getPublicContactSettings = cache(async () => {
   const data = await getPublicHomepageData()

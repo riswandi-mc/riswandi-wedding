@@ -12,20 +12,30 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from("website_settings")
-    .select("id")
-    .limit(1)
+  try {
+    const supabase = await createClient()
+    const { error } = await supabase
+      .from("website_settings")
+      .select("id")
+      .limit(1)
 
-  if (error) {
-    console.error("Supabase keep-alive query failed", error)
+    if (error) {
+      console.error("Supabase keep-alive query failed")
+
+      return NextResponse.json(
+        { error: "Service unavailable" },
+        { status: 503 }
+      )
+    }
 
     return NextResponse.json(
-      { error: "Supabase keep-alive query failed" },
-      { status: 503 }
+      { ok: true },
+      { headers: { "Cache-Control": "no-store" } },
+    )
+  } catch {
+    return NextResponse.json(
+      { error: "Service unavailable" },
+      { status: 503 },
     )
   }
-
-  return NextResponse.json({ ok: true })
 }

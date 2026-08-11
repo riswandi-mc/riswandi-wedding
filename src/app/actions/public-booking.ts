@@ -60,29 +60,36 @@ export async function submitMcBooking(
     }
   }
 
-  const supabase = await createClient()
-  const { data, error } = await supabase.rpc("submit_mc_booking", {
-    p_client_name: parsed.data.clientName,
-    p_phone: parsed.data.phone,
-    p_event_date: parsed.data.eventDate,
-    p_service_name: parsed.data.serviceName,
-    p_event_location: normalizeOptional(parsed.data.eventLocation),
-    p_notes: normalizeOptional(parsed.data.notes),
-  })
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase.rpc("submit_mc_booking", {
+      p_client_name: parsed.data.clientName,
+      p_phone: parsed.data.phone,
+      p_event_date: parsed.data.eventDate,
+      p_service_name: parsed.data.serviceName,
+      p_event_location: normalizeOptional(parsed.data.eventLocation),
+      p_notes: normalizeOptional(parsed.data.notes),
+    })
 
-  const result = Array.isArray(data) ? data[0] : null
+    const result = Array.isArray(data) ? data[0] : null
 
-  if (error || !result) {
+    if (error || !result) {
+      return {
+        ok: false,
+        error: "Booking gagal dikirim. Silakan coba lagi.",
+      }
+    }
+
+    return {
+      ok: true,
+      publicId: result.public_id,
+      whatsappMessage: result.whatsapp_message,
+    }
+  } catch {
     return {
       ok: false,
-      error: error?.message ?? "Booking gagal dikirim. Silakan coba lagi.",
+      error: "Layanan booking sedang tidak tersedia. Silakan coba lagi.",
     }
-  }
-
-  return {
-    ok: true,
-    publicId: result.public_id,
-    whatsappMessage: result.whatsapp_message,
   }
 }
 
@@ -98,29 +105,36 @@ export async function submitInvitationOrder(
     }
   }
 
-  const supabase = await createClient()
-  const { data, error } = await supabase.rpc("submit_invitation_order", {
-    p_couple_name: parsed.data.coupleName,
-    p_phone: parsed.data.phone,
-    p_event_date: parsed.data.eventDate,
-    p_target_completion_date: normalizeOptional(parsed.data.targetCompletionDate),
-    p_event_location: parsed.data.eventLocation,
-    p_template_name: parsed.data.templateName,
-    p_notes: normalizeOptional(parsed.data.notes),
-  })
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase.rpc("submit_invitation_order", {
+      p_couple_name: parsed.data.coupleName,
+      p_phone: parsed.data.phone,
+      p_event_date: parsed.data.eventDate,
+      p_target_completion_date: normalizeOptional(parsed.data.targetCompletionDate),
+      p_event_location: parsed.data.eventLocation,
+      p_template_name: parsed.data.templateName,
+      p_notes: normalizeOptional(parsed.data.notes),
+    })
 
-  const result = Array.isArray(data) ? data[0] : null
+    const result = Array.isArray(data) ? data[0] : null
 
-  if (error || !result) {
+    if (error || !result) {
+      return {
+        ok: false,
+        error: "Pesanan undangan gagal dikirim. Silakan coba lagi.",
+      }
+    }
+
+    return {
+      ok: true,
+      publicId: result.public_id,
+      whatsappMessage: result.whatsapp_message,
+    }
+  } catch {
     return {
       ok: false,
-      error: error?.message ?? "Pesanan undangan gagal dikirim. Silakan coba lagi.",
+      error: "Layanan pemesanan sedang tidak tersedia. Silakan coba lagi.",
     }
-  }
-
-  return {
-    ok: true,
-    publicId: result.public_id,
-    whatsappMessage: result.whatsapp_message,
   }
 }

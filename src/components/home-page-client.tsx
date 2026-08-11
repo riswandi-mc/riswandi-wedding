@@ -75,6 +75,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import { resolvePublicStorageUrl } from "@/lib/storage-url";
 
 type HomepageSettings = {
@@ -261,6 +262,24 @@ function getTemplatePreview(template: HomepageTemplate) {
   );
 }
 
+function getTemplateDemoUrl(template: HomepageTemplate) {
+  if (!template.is_demo_ready || !template.demo_url) {
+    return null;
+  }
+
+  try {
+    const demoUrl = new URL(template.demo_url);
+
+    if (demoUrl.protocol !== "https:") {
+      return null;
+    }
+
+    return demoUrl.href;
+  } catch {
+    return null;
+  }
+}
+
 function getGalleryPreview(item: HomepageGalleryItem) {
   return item.thumbnail_url ?? item.media_url;
 }
@@ -345,6 +364,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
     setIsMCOpen(false);
     setMcForm(emptyMcForm);
+    trackEvent("booking_mc_submit", { service_name: mcForm.serviceName });
     setConfirmation({
       title: "Booking Berhasil Dicatat",
       description:
@@ -405,6 +425,9 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
     setIsUndanganOpen(false);
     setInvitationForm(emptyInvitationForm);
+    trackEvent("invitation_order_submit", {
+      template_name: invitationForm.templateName,
+    });
     setConfirmation({
       title: "Pesanan Berhasil Dicatat",
       description:
@@ -417,34 +440,37 @@ export default function HomePageClient({ data }: HomePageClientProps) {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2" aria-label={`${brandName} - Beranda`}>
             <span className="font-heading text-xl font-bold tracking-tight">
               {brandName}
             </span>
-          </div>
+          </Link>
 
           <nav className="hidden gap-6 text-sm font-medium md:flex">
-            <a href="#layanan" className="transition-colors hover:text-primary">
+            <Link href="/layanan-mc" className="transition-colors hover:text-primary">
               Layanan
-            </a>
-            <a
-              href="#undangan"
+            </Link>
+            <Link
+              href="/undangan-digital"
               className="transition-colors hover:text-primary"
             >
               Undangan
-            </a>
+            </Link>
             <a
               href="#testimoni"
               className="transition-colors hover:text-primary"
             >
               Testimoni
             </a>
-            <a href="#galeri" className="transition-colors hover:text-primary">
+            <Link href="/galeri" className="transition-colors hover:text-primary">
               Galeri
-            </a>
-            <a href="#faq" className="transition-colors hover:text-primary">
+            </Link>
+            <Link href="/faq" className="transition-colors hover:text-primary">
               FAQ
-            </a>
+            </Link>
+            <Link href="/kontak" className="transition-colors hover:text-primary">
+              Kontak
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -453,6 +479,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 href={buildWhatsAppUrl(waNumber, getConsultationMessage())}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackEvent("whatsapp_click", { location: "header" })}
               >
                 Hubungi Kami
               </a>
@@ -480,20 +507,20 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     </SheetTitle>
                   </SheetHeader>
                   <nav className="flex flex-col gap-4 text-base font-medium">
-                    <a
-                      href="#layanan"
+                    <Link
+                      href="/layanan-mc"
                       onClick={() => setIsMenuOpen(false)}
                       className="border-b border-border/40 py-2 transition-colors hover:text-primary"
                     >
                       Layanan
-                    </a>
-                    <a
-                      href="#undangan"
+                    </Link>
+                    <Link
+                      href="/undangan-digital"
                       onClick={() => setIsMenuOpen(false)}
                       className="border-b border-border/40 py-2 transition-colors hover:text-primary"
                     >
                       Undangan
-                    </a>
+                    </Link>
                     <a
                       href="#testimoni"
                       onClick={() => setIsMenuOpen(false)}
@@ -501,20 +528,27 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     >
                       Testimoni
                     </a>
-                    <a
-                      href="#galeri"
+                    <Link
+                      href="/galeri"
                       onClick={() => setIsMenuOpen(false)}
                       className="border-b border-border/40 py-2 transition-colors hover:text-primary"
                     >
                       Galeri
-                    </a>
-                    <a
-                      href="#faq"
+                    </Link>
+                    <Link
+                      href="/faq"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="border-b border-border/40 py-2 transition-colors hover:text-primary"
+                    >
+                      FAQ
+                    </Link>
+                    <Link
+                      href="/kontak"
                       onClick={() => setIsMenuOpen(false)}
                       className="py-2 transition-colors hover:text-primary"
                     >
-                      FAQ
-                    </a>
+                      Kontak
+                    </Link>
                   </nav>
                 </div>
                 <div className="mt-auto border-t border-border pt-6">
@@ -526,6 +560,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       )}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => trackEvent("whatsapp_click", { location: "mobile_menu" })}
                     >
                       Hubungi Kami via WA
                     </a>
@@ -542,7 +577,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           <div className="absolute inset-0 z-0">
             <Image
               src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070&auto=format&fit=crop"
-              alt="Wedding Event"
+              alt=""
               fill
               sizes="100vw"
               className="object-cover brightness-50"
@@ -557,15 +592,15 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               Spesialis Acara Pernikahan dan Formal
             </Badge>
             <h1 className="max-w-4xl font-heading text-3xl font-bold leading-[1.1] text-shadow-sm sm:text-5xl md:text-6xl lg:text-7xl">
-              MC Profesional untuk Momen Tak Terlupakan
+              Jasa MC Wedding Profesional di Jabodetabek
             </h1>
             <p className="max-w-2xl text-lg text-gray-100 text-shadow-sm md:text-xl">
-              Menghidupkan suasana acara Anda dari awal hingga akhir dengan
-              profesionalisme dan kehangatan.
+              Riswandi Wedding membantu menyusun alur acara yang hangat,
+              terarah, dan berkesan untuk pernikahan maupun acara formal Anda.
             </p>
             <div className="flex flex-col gap-4 pt-6 sm:flex-row">
               <Button asChild size="lg" className="h-12 px-8 text-base">
-                <a href="#layanan">Lihat Layanan</a>
+                <Link href="/layanan-mc">Jelajahi Paket MC</Link>
               </Button>
               <Button
                 variant="outline"
@@ -575,6 +610,49 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               >
                 Booking Sekarang
               </Button>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="tentang"
+          aria-labelledby="tentang-riswandi-wedding"
+          className="border-b bg-muted/30 py-14 md:py-18"
+        >
+          <div className="container mx-auto grid gap-8 px-4 md:grid-cols-[0.8fr_1.2fr] md:items-start">
+            <div className="space-y-3">
+              <Badge variant="outline">Tentang Kami</Badge>
+              <h2
+                id="tentang-riswandi-wedding"
+                className="font-heading text-3xl font-bold text-primary md:text-4xl"
+              >
+                Pendamping Acara dari Persiapan hingga Hari H
+              </h2>
+            </div>
+            <div className="space-y-5 text-base leading-7 text-muted-foreground">
+              <p>
+                Riswandi Wedding menyediakan jasa MC wedding dan MC all event
+                untuk membantu acara berjalan sesuai rundown tanpa kehilangan
+                suasana akrab. Area layanan utama kami mencakup Jabodetabek dan
+                sekitarnya, sementara kebutuhan luar kota dapat dikonsultasikan.
+              </p>
+              <p>
+                Selain layanan MC, tersedia undangan digital dengan beragam
+                pilihan tampilan. Anda dapat membandingkan paket, melihat
+                dokumentasi acara, membaca testimoni klien, dan menemukan
+                jawaban pemesanan sebelum menghubungi tim kami.
+              </p>
+              <div className="flex flex-wrap gap-x-5 gap-y-3 font-medium text-primary">
+                <Link href="/layanan-mc" className="underline-offset-4 hover:underline">
+                  Pelajari paket jasa MC
+                </Link>
+                <Link href="/undangan-digital" className="underline-offset-4 hover:underline">
+                  Lihat pilihan undangan digital
+                </Link>
+                <Link href="/faq" className="underline-offset-4 hover:underline">
+                  Baca FAQ pemesanan
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -652,19 +730,17 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   </Card>
                 ))}
               </div>
-              {data.services.length > 3 ? (
-                <div className="text-center">
-                  <Button variant="outline" size="lg" asChild>
-                    <Link
-                      href="/layanan-mc"
-                      className="inline-flex items-center gap-2"
-                    >
-                      Lihat Semua Layanan MC
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              ) : null}
+              <div className="text-center">
+                <Button variant="outline" size="lg" asChild>
+                  <Link
+                    href="/layanan-mc"
+                    className="inline-flex items-center gap-2"
+                  >
+                    Pelajari Detail Semua Paket MC
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
@@ -699,6 +775,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               <div className="mb-12 grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4">
                 {data.templates.map((template, index) => {
                   const previewSrc = getTemplatePreview(template);
+                  const demoUrl = getTemplateDemoUrl(template);
 
                   return (
                     <Card
@@ -709,7 +786,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                         {previewSrc ? (
                           <Image
                             src={previewSrc}
-                            alt={`${template.name} preview`}
+                            alt={`Pratinjau template undangan digital ${template.name}`}
                             fill
                             sizes="(max-width: 768px) 50vw, (max-width: 1280px) 25vw, 20vw"
                             priority={index < 2}
@@ -735,16 +812,23 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                         </div>
                       </CardContent>
                       <CardFooter className="grid w-full grid-cols-2 gap-1.5 p-3 pt-0 md:gap-2 md:p-4 md:pt-0">
-                        {template.is_demo_ready && template.demo_url ? (
+                        {demoUrl ? (
                           <Button
                             variant="outline"
                             className="w-full px-0 text-[10px] md:text-xs"
                             asChild
                           >
                             <a
-                              href={template.demo_url}
+                              href={demoUrl}
                               target="_blank"
                               rel="noopener noreferrer"
+                              aria-label={`Buka demo ${template.name}`}
+                              onClick={() =>
+                                trackEvent("invitation_demo_click", {
+                                  location: "homepage_catalog",
+                                  template_name: template.name,
+                                })
+                              }
                               className="flex items-center justify-center"
                             >
                               Demo{" "}
@@ -900,7 +984,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                                         testimonial.photo_url,
                                       ) ?? testimonial.photo_url
                                     }
-                                    alt={testimonial.client_name}
+                                    alt={`Foto klien ${testimonial.client_name}`}
                                     fill
                                     sizes="80px"
                                     className="object-cover"
@@ -994,7 +1078,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   >
                     <Image
                       src={getGalleryPreview(item)}
-                      alt={item.title}
+                      alt={`Dokumentasi acara ${item.title}`}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -1023,16 +1107,19 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           </div>
 
           <div className="mt-12 text-center">
-            <Button
-              variant="outline"
-              size="lg"
-              className="group rounded-full px-8"
-              onClick={() =>
-                window.open(instagramUrl, "_blank", "noopener,noreferrer")
-              }
-            >
-              Lihat Lebih Banyak di Instagram
-              <Camera className="ml-2 h-4 w-4 transition-colors group-hover:text-pink-600" />
+            <Button variant="outline" size="lg" className="group rounded-full px-8" asChild>
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("instagram_click", { location: "gallery_section" })}
+              >
+                Lihat Dokumentasi Lain di Instagram
+                <Camera className="ml-2 h-4 w-4 transition-colors group-hover:text-pink-600" />
+              </a>
+            </Button>
+            <Button variant="ghost" size="lg" className="ml-2 rounded-full px-8" asChild>
+              <Link href="/galeri">Buka Halaman Galeri</Link>
             </Button>
           </div>
         </section>
@@ -1044,7 +1131,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           <div className="container mx-auto max-w-3xl px-4">
             <div className="mb-12 space-y-4 text-center">
               <h2 className="font-heading text-3xl font-bold text-primary md:text-4xl">
-                Frequently Asked Questions
+                Pertanyaan yang Sering Diajukan
               </h2>
               <p className="text-muted-foreground">
                 Jawaban dari pertanyaan yang paling sering diajukan kepada kami.
@@ -1081,11 +1168,16 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 FAQ belum tersedia saat ini.
               </div>
             )}
+            <div className="mt-8 text-center">
+              <Button asChild variant="outline">
+                <Link href="/faq">Baca Semua FAQ</Link>
+              </Button>
+            </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-[#1a1a1a] py-16 text-white">
+      <footer id="kontak" className="scroll-mt-16 bg-[#1a1a1a] py-16 text-white">
         <div className="container mx-auto grid grid-cols-1 gap-12 px-4 md:grid-cols-12 lg:gap-8">
           <div className="space-y-6 md:col-span-5">
             <h3 className="font-heading text-3xl font-bold tracking-tight">
@@ -1094,7 +1186,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <p className="max-w-sm text-[15px] leading-relaxed text-white/60">
               Menyediakan layanan MC profesional dan undangan digital elegan
               untuk menyempurnakan dan mengabadikan momen bahagia di hari
-              istimewa Anda.
+              istimewa Anda di Jabodetabek dan sekitarnya.
             </p>
           </div>
 
@@ -1103,30 +1195,36 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               Tautan Cepat
             </h4>
             <nav className="flex flex-col gap-3 text-[15px] text-white/60">
-              <a
-                href="#layanan"
+              <Link
+                href="/layanan-mc"
                 className="w-fit transition-colors hover:text-white"
               >
                 Layanan MC
-              </a>
-              <a
-                href="#undangan"
+              </Link>
+              <Link
+                href="/layanan-mc"
+                className="w-fit transition-colors hover:text-white"
+              >
+                Detail Paket MC
+              </Link>
+              <Link
+                href="/undangan-digital"
                 className="w-fit transition-colors hover:text-white"
               >
                 Undangan Digital
-              </a>
-              <a
-                href="#galeri"
+              </Link>
+              <Link
+                href="/galeri"
                 className="w-fit transition-colors hover:text-white"
               >
                 Galeri Dokumentasi
-              </a>
-              <a
-                href="#faq"
+              </Link>
+              <Link
+                href="/faq"
                 className="w-fit transition-colors hover:text-white"
               >
                 FAQ
-              </a>
+              </Link>
             </nav>
           </div>
 
@@ -1142,6 +1240,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-white"
+                  onClick={() => trackEvent("whatsapp_click", { location: "footer" })}
                 >
                   +{waNumber}
                 </a>
@@ -1152,6 +1251,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   <a
                     href={`mailto:${email}`}
                     className="transition-colors hover:text-white"
+                    onClick={() => trackEvent("email_click", { location: "footer" })}
                   >
                     {email}
                   </a>
@@ -1164,6 +1264,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-white"
+                  onClick={() => trackEvent("instagram_click", { location: "footer" })}
                 >
                   {getInstagramLabel(instagramUrl)}
                 </a>
@@ -1180,14 +1281,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           <p>
             &copy; {new Date().getFullYear()} {brandName}. All rights reserved.
           </p>
-          <div className="flex gap-4">
-            <a href="#" className="transition-colors hover:text-white">
-              Privacy Policy
-            </a>
-            <a href="#" className="transition-colors hover:text-white">
-              Terms of Service
-            </a>
-          </div>
+          <p>Melayani Jabodetabek dan kebutuhan luar kota sesuai kesepakatan.</p>
         </div>
       </footer>
 
@@ -1195,6 +1289,8 @@ export default function HomePageClient({ data }: HomePageClientProps) {
         href={buildWhatsAppUrl(waNumber, getGeneralQuestionMessage())}
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="Chat Riswandi Wedding melalui WhatsApp"
+        onClick={() => trackEvent("whatsapp_click", { location: "floating_button" })}
         className="group fixed right-6 bottom-6 z-50 flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3.5 text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#20bd5a] hover:shadow-2xl"
       >
         <MessageCircle className="h-6 w-6" />
@@ -1226,6 +1322,9 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <Label htmlFor="mc-client-name">Nama Klien</Label>
             <Input
               id="mc-client-name"
+              name="clientName"
+              autoComplete="name"
+              aria-invalid={Boolean(mcError)}
               placeholder="Cth: Budi dan Rina"
               value={mcForm.clientName}
               onChange={(event) =>
@@ -1240,6 +1339,11 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <Label htmlFor="mc-phone">Nomor WhatsApp</Label>
             <Input
               id="mc-phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              aria-invalid={Boolean(mcError)}
               placeholder="Cth: 628123456789"
               value={mcForm.phone}
               onChange={(event) =>
@@ -1251,10 +1355,12 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             />
           </div>
           <div className="grid gap-2">
-            <Label>Tanggal Acara</Label>
+            <Label htmlFor="mc-event-date">Tanggal Acara</Label>
             <Popover open={mcDateOpen} onOpenChange={setMcDateOpen}>
               <PopoverTrigger asChild>
                 <Button
+                  id="mc-event-date"
+                  aria-invalid={Boolean(mcError)}
                   variant="outline"
                   className={cn(
                     "h-10 w-full justify-start bg-background text-left font-normal",
@@ -1292,7 +1398,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 setMcForm((current) => ({ ...current, serviceName: value }))
               }
             >
-              <SelectTrigger id="mc-service-name">
+              <SelectTrigger id="mc-service-name" aria-invalid={Boolean(mcError)}>
                 <SelectValue placeholder="Pilih layanan" />
               </SelectTrigger>
               <SelectContent>
@@ -1308,6 +1414,8 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <Label htmlFor="mc-location">Lokasi Acara</Label>
             <Input
               id="mc-location"
+              name="eventLocation"
+              autoComplete="street-address"
               placeholder="Opsional"
               value={mcForm.eventLocation}
               onChange={(event) =>
@@ -1322,6 +1430,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <Label htmlFor="mc-notes">Catatan Tambahan</Label>
             <textarea
               id="mc-notes"
+              name="notes"
               rows={4}
               placeholder="Opsional"
               value={mcForm.notes}
@@ -1335,7 +1444,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             />
           </div>
           {mcError ? (
-            <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+            <div role="alert" aria-live="assertive" className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
               {mcError}
             </div>
           ) : null}
@@ -1364,6 +1473,9 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <Label htmlFor="invitation-couple-name">Nama Mempelai</Label>
             <Input
               id="invitation-couple-name"
+              name="coupleName"
+              autoComplete="name"
+              aria-invalid={Boolean(invitationError)}
               placeholder="Cth: Romeo dan Juliet"
               value={invitationForm.coupleName}
               onChange={(event) =>
@@ -1378,6 +1490,11 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <Label htmlFor="invitation-phone">Nomor WhatsApp</Label>
             <Input
               id="invitation-phone"
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              aria-invalid={Boolean(invitationError)}
               placeholder="Cth: 628123456789"
               value={invitationForm.phone}
               onChange={(event) =>
@@ -1389,13 +1506,15 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             />
           </div>
           <div className="grid gap-2">
-            <Label>Tanggal Acara</Label>
+            <Label htmlFor="invitation-event-date">Tanggal Acara</Label>
             <Popover
               open={invitationDateOpen}
               onOpenChange={setInvitationDateOpen}
             >
               <PopoverTrigger asChild>
                 <Button
+                  id="invitation-event-date"
+                  aria-invalid={Boolean(invitationError)}
                   variant="outline"
                   className={cn(
                     "h-10 w-full justify-start bg-background text-left font-normal",
@@ -1429,13 +1548,14 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             </Popover>
           </div>
           <div className="grid gap-2">
-            <Label>Tanggal Target Jadi Undangan</Label>
+            <Label htmlFor="invitation-target-date">Tanggal Target Jadi Undangan</Label>
             <Popover
               open={invitationTargetDateOpen}
               onOpenChange={setInvitationTargetDateOpen}
             >
               <PopoverTrigger asChild>
                 <Button
+                  id="invitation-target-date"
                   variant="outline"
                   className={cn(
                     "h-10 w-full justify-start bg-background text-left font-normal",
@@ -1473,6 +1593,9 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <Label htmlFor="invitation-location">Lokasi Acara</Label>
             <Input
               id="invitation-location"
+              name="eventLocation"
+              autoComplete="street-address"
+              aria-invalid={Boolean(invitationError)}
               placeholder="Cth: Gedung Manggala Wanabakti, Jakarta"
               value={invitationForm.eventLocation}
               onChange={(event) =>
@@ -1494,7 +1617,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 }))
               }
             >
-              <SelectTrigger id="invitation-template">
+              <SelectTrigger id="invitation-template" aria-invalid={Boolean(invitationError)}>
                 <SelectValue placeholder="Pilih template" />
               </SelectTrigger>
               <SelectContent>
@@ -1510,6 +1633,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             <Label htmlFor="invitation-notes">Catatan Tambahan</Label>
             <textarea
               id="invitation-notes"
+              name="notes"
               rows={4}
               placeholder="Opsional"
               value={invitationForm.notes}
@@ -1523,7 +1647,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             />
           </div>
           {invitationError ? (
-            <div className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+            <div role="alert" aria-live="assertive" className="rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
               {invitationError}
             </div>
           ) : null}
@@ -1555,6 +1679,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     "_blank",
                     "noopener,noreferrer",
                   );
+                  trackEvent("whatsapp_click", { location: "submission_confirmation" });
                   setConfirmation(null);
                 }}
                 className="flex items-center justify-center gap-2"
@@ -1565,7 +1690,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
             </DialogFooter>
           }
         >
-          <div className="rounded-md border bg-muted p-4 text-sm whitespace-pre-wrap text-muted-foreground">
+          <div role="status" aria-live="polite" className="rounded-md border bg-muted p-4 text-sm whitespace-pre-wrap text-muted-foreground">
             {confirmation?.whatsappMessage}
           </div>
         </DialogFormContent>

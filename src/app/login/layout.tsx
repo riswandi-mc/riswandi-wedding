@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
 
-import { requireAdmin } from "@/lib/auth"
-
 export const metadata: Metadata = {
   alternates: {
     canonical: null,
@@ -18,12 +16,6 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  await requireAdmin()
-
-  return <>{children}</>
+export default function LoginLayout({ children }: { children: React.ReactNode }) {
+  return children
 }

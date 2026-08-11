@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import {
   createFaq,
@@ -37,8 +37,14 @@ function revalidateAdminLeadPaths() {
 }
 
 function revalidatePublicContentPaths() {
+  revalidateTag("public-homepage", { expire: 0 });
   revalidatePath("/");
   revalidatePath("/layanan-mc");
+  revalidatePath("/undangan-digital");
+  revalidatePath("/galeri");
+  revalidatePath("/tentang-kami");
+  revalidatePath("/kontak");
+  revalidatePath("/faq");
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/layanan-mc");
   revalidatePath("/dashboard/faq");
