@@ -34,6 +34,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogFooter, DialogFormContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -241,7 +242,7 @@ export function InvitationOrdersManager({
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background">
+      <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -259,7 +260,7 @@ export function InvitationOrdersManager({
         </div>
       </header>
 
-      <main className="flex-1 p-6 space-y-6 bg-muted/20">
+      <main className="admin-surface flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold font-heading text-primary">Pesanan Undangan Digital</h1>
@@ -645,7 +646,7 @@ export function InvitationOrdersManager({
           </div>
           <div className="grid gap-2">
             <Label htmlFor="order-notes">Catatan</Label>
-            <textarea
+            <Textarea
               id="order-notes"
               rows={4}
               placeholder="Opsional"

@@ -61,7 +61,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-[min(var(--radius-4xl),24px)] bg-popover p-6 text-sm text-popover-foreground shadow-xl ring-1 ring-foreground/5 duration-100 outline-none sm:max-w-md dark:ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-1.25rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-[min(var(--radius-4xl),28px)] border border-border bg-popover p-6 text-sm text-popover-foreground shadow-[0_28px_80px_rgba(23,62,49,.25)] duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
         {...props}
@@ -106,7 +106,7 @@ function DialogFormContent({
   return (
     <DialogContent className={cn("overflow-hidden p-0", className)} showCloseButton={showCloseButton} {...props}>
       <div className="flex max-h-[calc(100dvh-1.5rem)] w-full flex-col">
-        <div className="shrink-0 border-b border-border/70 px-5 py-4 pr-14 sm:px-6 sm:py-5">
+        <div className="shrink-0 border-b border-border/70 bg-secondary/35 px-5 py-4 pr-14 sm:px-6 sm:py-5">
           <DialogHeader className="gap-2">
             <DialogTitle className="text-lg leading-tight sm:text-xl">{title}</DialogTitle>
             {description ? <DialogDescription className="text-sm leading-6">{description}</DialogDescription> : null}

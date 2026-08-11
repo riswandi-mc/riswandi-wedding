@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { HeartHandshake, ListChecks, MessageCircle } from "lucide-react"
+import { ArrowRight, HeartHandshake, ListChecks, MapPin, MessageCircle } from "lucide-react"
 
 import { JsonLd } from "@/components/json-ld"
 import { PublicPageShell } from "@/components/public-page-shell"
-import { Badge } from "@/components/ui/badge"
+import { PublicPageHero, SectionHeading } from "@/components/public-ui"
 import { Button } from "@/components/ui/button"
 import { getPublicHomepageData } from "@/lib/data/public"
 import { createPublicPageMetadata } from "@/lib/seo"
@@ -23,22 +23,22 @@ export const metadata: Metadata = createPublicPageMetadata({
 
 const values = [
   {
-    title: "Komunikasi yang jelas",
-    description:
-      "Kebutuhan acara, susunan agenda, dan preferensi gaya dibahas sebelum hari H.",
+    title: "Didengar sebelum diarahkan",
+    description: "Konsep, profil tamu, preferensi keluarga, dan momen penting dibahas agar acara terasa benar-benar milik Anda.",
     icon: MessageCircle,
+    number: "01",
   },
   {
-    title: "Alur yang terarah",
-    description:
-      "Persiapan berfokus pada transisi acara, koordinasi, dan pengalaman tamu.",
+    title: "Rapi tanpa terasa kaku",
+    description: "Rundown dan transisi dijaga dengan terarah, sambil tetap memberi ruang untuk interaksi yang hangat dan natural.",
     icon: ListChecks,
+    number: "02",
   },
   {
-    title: "Pendekatan yang hangat",
-    description:
-      "Pembawaan disesuaikan agar acara tetap rapi tanpa kehilangan suasana akrab.",
+    title: "Hadir sebagai partner",
+    description: "Komunikasi dibangun sejak konsultasi hingga hari H agar Anda tidak merasa menjalani persiapan sendirian.",
     icon: HeartHandshake,
+    number: "03",
   },
 ]
 
@@ -58,66 +58,55 @@ export default async function TentangKamiPage() {
     <>
       <JsonLd data={jsonLd} />
       <PublicPageShell settings={data.settings}>
-        <section className="border-b bg-muted/30">
-          <div className="container mx-auto grid gap-10 px-4 py-14 md:py-20 lg:grid-cols-[1fr_0.8fr] lg:items-center">
-            <div className="space-y-5">
-              <Badge variant="outline">Tentang Kami</Badge>
-              <h1 className="font-heading text-4xl font-bold text-primary md:text-6xl">
-                Pendamping Acara yang Hangat dan Terarah
-              </h1>
-              <p className="text-lg leading-8 text-muted-foreground">
-                {brandName} menyediakan jasa MC wedding, MC all event, dan
-                undangan digital. Fokus kami adalah membantu calon klien
-                memahami pilihan layanan, menyiapkan detail, dan menjaga
-                komunikasi hingga kebutuhan acara terkonfirmasi.
-              </p>
+        <PublicPageHero
+          eyebrow="Tentang Kami"
+          title={<>Bekerja rapi.<br /><span className="text-[#d98065] italic">Membawakan dengan hati.</span></>}
+          description={<>Di {brandName}, kami percaya acara yang berkesan lahir dari persiapan yang matang dan pembawaan yang terasa dekat—bukan sekadar ramai.</>}
+          actions={
+            <>
+              <Button asChild size="lg"><Link href="/layanan-mc">Temukan Paket MC <ArrowRight className="size-4" /></Link></Button>
+              <Button asChild size="lg" variant="outline"><Link href="/kontak">Kenalan & Konsultasi</Link></Button>
+            </>
+          }
+          aside={
+            <div>
+              <span className="grid size-12 place-items-center rounded-2xl bg-secondary text-primary"><MapPin className="size-5" /></span>
+              <h2 className="mt-5 font-heading text-3xl font-semibold text-primary">Dekat untuk Jabodetabek, siap melangkah lebih jauh.</h2>
+              <p className="mt-3 leading-7 text-muted-foreground">Layanan reguler mencakup Jakarta, Bogor, Depok, Tangerang, dan Bekasi. Acara luar kota atau luar pulau dapat dibahas dengan penyesuaian jadwal, transportasi, dan akomodasi.</p>
             </div>
-            <div className="rounded-3xl border bg-background p-8 shadow-sm">
-              <h2 className="font-heading text-2xl font-semibold">Area Pelayanan</h2>
-              <p className="mt-3 leading-7 text-muted-foreground">
-                Layanan reguler mencakup Jakarta, Bogor, Depok, Tangerang, dan
-                Bekasi. Kebutuhan luar kota atau luar pulau dapat dibahas dengan
-                penyesuaian jadwal, transportasi, dan akomodasi.
-              </p>
-            </div>
-          </div>
-        </section>
+          }
+        />
 
-        <section className="container mx-auto px-4 py-14 md:py-20" aria-labelledby="nilai-layanan">
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 id="nilai-layanan" className="font-heading text-3xl font-bold text-primary">
-              Nilai dalam Setiap Layanan
-            </h2>
-            <p className="mt-3 leading-7 text-muted-foreground">
-              Tiga prinsip ini menjadi dasar proses konsultasi dan persiapan acara.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {values.map((value) => {
+        <section className="site-container section-shell" aria-labelledby="nilai-layanan">
+          <SectionHeading
+            eyebrow="Nilai layanan"
+            title={<>Yang kami jaga di<br />setiap acara.</>}
+            description="Tiga prinsip sederhana yang membantu proses terasa jelas bagi Anda dan nyaman bagi setiap tamu."
+          />
+          <div className="grid gap-5 md:grid-cols-3">
+            {values.map((value, index) => {
               const Icon = value.icon
               return (
-                <article key={value.title} className="rounded-2xl border p-6">
-                  <Icon className="h-8 w-8 text-primary" aria-hidden="true" />
-                  <h3 className="mt-5 font-heading text-xl font-semibold">{value.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{value.description}</p>
+                <article key={value.title} className={`relative overflow-hidden rounded-[1.75rem] border p-7 ${index === 1 ? "border-[#d98065] bg-[#d98065] text-white md:translate-y-4" : index === 2 ? "border-primary bg-primary text-white" : "border-border bg-card"}`}>
+                  <div className="flex items-center justify-between">
+                    <span className={`grid size-13 place-items-center rounded-2xl ${index === 1 ? "bg-white/15" : index === 2 ? "bg-[#c8dc9d] text-primary" : "bg-secondary text-primary"}`}><Icon className="size-6" aria-hidden="true" /></span>
+                    <span className="font-heading text-2xl opacity-55">{value.number}</span>
+                  </div>
+                  <h3 className="mt-7 font-heading text-3xl font-semibold leading-none">{value.title}</h3>
+                  <p className={`mt-4 text-sm leading-7 ${index > 0 ? "text-white/70" : "text-muted-foreground"}`}>{value.description}</p>
                 </article>
               )
             })}
           </div>
         </section>
 
-        <section className="border-y bg-muted/30 py-14">
-          <div className="container mx-auto flex flex-col items-start justify-between gap-6 px-4 md:flex-row md:items-center">
+        <section className="bg-[#f1c875] py-14 sm:py-18">
+          <div className="site-container flex flex-col items-start justify-between gap-7 md:flex-row md:items-center">
             <div className="max-w-2xl">
-              <h2 className="font-heading text-3xl font-bold text-primary">Siap Membahas Acara Anda?</h2>
-              <p className="mt-2 text-muted-foreground">
-                Pelajari paket MC atau hubungi tim untuk menyampaikan tanggal, lokasi, dan konsep acara.
-              </p>
+              <span className="section-eyebrow">Mari mulai</span>
+              <h2 className="display-title mt-4 text-4xl text-primary sm:text-5xl">Acara Anda punya cerita. Mari bawakan dengan cara yang tepat.</h2>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild><Link href="/layanan-mc">Lihat Layanan MC</Link></Button>
-              <Button asChild variant="outline"><Link href="/kontak">Hubungi Kami</Link></Button>
-            </div>
+            <Button asChild size="lg"><Link href="/kontak">Ceritakan Rencana Anda <ArrowRight className="size-4" /></Link></Button>
           </div>
         </section>
       </PublicPageShell>

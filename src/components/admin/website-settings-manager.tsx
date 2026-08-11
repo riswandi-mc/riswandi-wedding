@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { AdminProfile, AdminWebsiteSettings } from "@/lib/data/admin";
@@ -107,7 +108,7 @@ export function WebsiteSettingsManager({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
+      <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -125,7 +126,7 @@ export function WebsiteSettingsManager({
         </div>
       </header>
 
-      <main className="flex-1 space-y-6 bg-muted/20 p-6">
+      <main className="admin-surface flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
         <div>
           <h1 className="font-heading text-2xl font-bold text-primary">
             Pengaturan Sistem
@@ -291,7 +292,7 @@ export function WebsiteSettingsManager({
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="address">Alamat</Label>
-                    <textarea
+                    <Textarea
                       id="address"
                       rows={4}
                       className="flex min-h-[96px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -353,7 +354,7 @@ export function WebsiteSettingsManager({
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="wa-mc">Template Pesan Booking MC</Label>
-                    <textarea
+                    <Textarea
                       id="wa-mc"
                       rows={5}
                       className="flex min-h-[112px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -373,7 +374,7 @@ export function WebsiteSettingsManager({
                     <Label htmlFor="wa-invitation">
                       Template Pesan Order Undangan
                     </Label>
-                    <textarea
+                    <Textarea
                       id="wa-invitation"
                       rows={6}
                       className="flex min-h-[128px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"

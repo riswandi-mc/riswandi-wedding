@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, EB_Garamond, Lora } from "next/font/google";
+import { Geist, EB_Garamond } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,12 +11,13 @@ import {
   SITE_TITLE,
 } from "@/lib/seo";
 
-const loraHeading = Lora({ subsets: ['latin'], variable: '--font-heading' });
-
-const ebGaramond = EB_Garamond({ subsets: ['latin'], variable: '--font-serif' });
+const displayFont = EB_Garamond({
+  subsets: ["latin"],
+  variable: "--font-display",
+});
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
@@ -48,9 +49,10 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={cn("h-full", "antialiased", geistSans.variable, "font-serif", ebGaramond.variable, loraHeading.variable)}
+      data-scroll-behavior="smooth"
+      className={cn("h-full antialiased", geistSans.variable, displayFont.variable)}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col font-sans">
         <TooltipProvider>
           {children}
         </TooltipProvider>

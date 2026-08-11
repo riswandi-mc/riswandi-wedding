@@ -18,10 +18,12 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogFooter, DialogFormContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
@@ -182,7 +184,7 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
+      <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -200,7 +202,7 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
         </div>
       </header>
 
-      <main className="flex-1 space-y-6 bg-muted/20 p-6">
+      <main className="admin-surface flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h1 className="font-heading text-2xl font-bold text-primary">Manajemen Konten Layanan MC</h1>
@@ -391,7 +393,7 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
           </div>
           <div className="grid gap-2">
             <Label htmlFor="service-description">Deskripsi Singkat</Label>
-            <textarea
+            <Textarea
               id="service-description"
               rows={3}
               className="flex min-h-[88px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -401,7 +403,7 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
           </div>
           <div className="grid gap-2">
             <Label htmlFor="service-features">Fitur Layanan</Label>
-            <textarea
+            <Textarea
               id="service-features"
               rows={5}
               placeholder="Tulis satu fitur per baris"
@@ -427,11 +429,11 @@ export function McServicesManager({ initialServices }: { initialServices: AdminM
             </div>
             <div className="grid gap-2 pt-1 text-sm sm:pt-7">
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isActive} onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))} />
+                <Checkbox checked={form.isActive} onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))} />
                 Aktif di halaman publik
               </label>
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.isFeatured} onChange={(event) => setForm((current) => ({ ...current, isFeatured: event.target.checked }))} />
+                <Checkbox checked={form.isFeatured} onChange={(event) => setForm((current) => ({ ...current, isFeatured: event.target.checked }))} />
                 Featured
               </label>
             </div>

@@ -167,7 +167,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
+      <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -181,7 +181,7 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      <main className="flex-1 space-y-6 bg-muted/20 p-6">
+      <main className="admin-surface flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h1 className="text-3xl font-bold font-heading text-primary">Selamat Datang, Riswandi!</h1>

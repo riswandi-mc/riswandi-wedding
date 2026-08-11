@@ -84,7 +84,7 @@ export function NavUser({
               }}
             >
               <LogOutIcon />
-              {isPending ? "Logging out..." : "Log out"}
+                  {isPending ? "Sedang keluar..." : "Keluar"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

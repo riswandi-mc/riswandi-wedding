@@ -12,10 +12,7 @@ import {
   CheckCircle,
   ExternalLink,
   Info,
-  Mail,
-  Menu,
   MessageCircle,
-  Phone,
   Star,
   Video,
 } from "lucide-react";
@@ -32,6 +29,11 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  FloatingWhatsappButton,
+  PublicFooter,
+  PublicHeader,
+} from "@/components/public-page-shell";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
@@ -55,6 +57,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
@@ -67,13 +70,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { resolvePublicStorageUrl } from "@/lib/storage-url";
@@ -225,23 +221,6 @@ function buildWhatsAppUrl(phone: string, text: string) {
   return `https://wa.me/${normalizeWhatsAppNumber(phone)}?text=${encodeURIComponent(text)}`;
 }
 
-function getConsultationMessage() {
-  return "Halo Kak Riswandi! Saya ingin konsultasi seputar layanan MC dan undangan digital.";
-}
-
-function getGeneralQuestionMessage() {
-  return "Halo Kak Riswandi! Saya ingin bertanya seputar layanan yang tersedia.";
-}
-
-function getInstagramLabel(instagramUrl: string | null) {
-  if (!instagramUrl) {
-    return "@mriswandiwedding__";
-  }
-
-  const match = instagramUrl.match(/instagram\.com\/([^/?#]+)/i);
-  return match ? `@${match[1]}` : "@mriswandiwedding__";
-}
-
 function getServiceBadgeClass(variant: string | null) {
   switch (variant) {
     case "popular":
@@ -285,7 +264,6 @@ function getGalleryPreview(item: HomepageGalleryItem) {
 }
 
 export default function HomePageClient({ data }: HomePageClientProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMCOpen, setIsMCOpen] = useState(false);
   const [isUndanganOpen, setIsUndanganOpen] = useState(false);
   const [confirmation, setConfirmation] = useState<ConfirmationState | null>(
@@ -308,9 +286,13 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
   const brandName = data.settings?.brand_name ?? FALLBACK_BRAND;
   const waNumber = data.settings?.phone_whatsapp ?? FALLBACK_WHATSAPP;
-  const email = data.settings?.email;
   const instagramUrl = data.settings?.instagram_url ?? FALLBACK_INSTAGRAM;
-  const address = data.settings?.address;
+  const averageRating = data.testimonials.length
+    ? (
+        data.testimonials.reduce((total, testimonial) => total + testimonial.rating, 0) /
+        data.testimonials.length
+      ).toFixed(1)
+    : "5.0";
 
   const openMcDialog = (serviceName = "") => {
     setMcError(null);
@@ -437,179 +419,62 @@ export default function HomePageClient({ data }: HomePageClientProps) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2" aria-label={`${brandName} - Beranda`}>
-            <span className="font-heading text-xl font-bold tracking-tight">
-              {brandName}
-            </span>
-          </Link>
-
-          <nav className="hidden gap-6 text-sm font-medium md:flex">
-            <Link href="/layanan-mc" className="transition-colors hover:text-primary">
-              Layanan
-            </Link>
-            <Link
-              href="/undangan-digital"
-              className="transition-colors hover:text-primary"
-            >
-              Undangan
-            </Link>
-            <a
-              href="#testimoni"
-              className="transition-colors hover:text-primary"
-            >
-              Testimoni
-            </a>
-            <Link href="/galeri" className="transition-colors hover:text-primary">
-              Galeri
-            </Link>
-            <Link href="/faq" className="transition-colors hover:text-primary">
-              FAQ
-            </Link>
-            <Link href="/kontak" className="transition-colors hover:text-primary">
-              Kontak
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <Button asChild size="sm" className="hidden sm:inline-flex">
-              <a
-                href={buildWhatsAppUrl(waNumber, getConsultationMessage())}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackEvent("whatsapp_click", { location: "header" })}
-              >
-                Hubungi Kami
-              </a>
-            </Button>
-
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden"
-                  aria-label="Menu Utama"
-                >
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="right"
-                className="flex w-[300px] flex-col justify-between bg-background p-6 sm:w-[380px]"
-              >
-                <div className="space-y-6">
-                  <SheetHeader className="border-b px-0 pb-4 text-left">
-                    <SheetTitle className="font-heading text-xl font-bold">
-                      {brandName}
-                    </SheetTitle>
-                  </SheetHeader>
-                  <nav className="flex flex-col gap-4 text-base font-medium">
-                    <Link
-                      href="/layanan-mc"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="border-b border-border/40 py-2 transition-colors hover:text-primary"
-                    >
-                      Layanan
-                    </Link>
-                    <Link
-                      href="/undangan-digital"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="border-b border-border/40 py-2 transition-colors hover:text-primary"
-                    >
-                      Undangan
-                    </Link>
-                    <a
-                      href="#testimoni"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="border-b border-border/40 py-2 transition-colors hover:text-primary"
-                    >
-                      Testimoni
-                    </a>
-                    <Link
-                      href="/galeri"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="border-b border-border/40 py-2 transition-colors hover:text-primary"
-                    >
-                      Galeri
-                    </Link>
-                    <Link
-                      href="/faq"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="border-b border-border/40 py-2 transition-colors hover:text-primary"
-                    >
-                      FAQ
-                    </Link>
-                    <Link
-                      href="/kontak"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="py-2 transition-colors hover:text-primary"
-                    >
-                      Kontak
-                    </Link>
-                  </nav>
-                </div>
-                <div className="mt-auto border-t border-border pt-6">
-                  <Button asChild className="w-full" size="lg">
-                    <a
-                      href={buildWhatsAppUrl(
-                        waNumber,
-                        getConsultationMessage(),
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => trackEvent("whatsapp_click", { location: "mobile_menu" })}
-                    >
-                      Hubungi Kami via WA
-                    </a>
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </header>
+    <div className="site-public flex min-h-screen flex-col bg-background">
+      <PublicHeader settings={data.settings} />
 
       <main className="flex-1">
-        <section className="relative flex h-[80vh] w-full items-center justify-center overflow-hidden bg-muted">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2070&auto=format&fit=crop"
-              alt=""
-              fill
-              sizes="100vw"
-              className="object-cover brightness-50"
-              priority
-            />
-          </div>
-          <div className="relative z-10 container flex flex-col items-center space-y-6 px-4 text-center text-white">
-            <Badge
-              variant="secondary"
-              className="border-none bg-white/20 px-4 py-1.5 text-white backdrop-blur hover:bg-white/30"
-            >
-              Spesialis Acara Pernikahan dan Formal
-            </Badge>
-            <h1 className="max-w-4xl font-heading text-3xl font-bold leading-[1.1] text-shadow-sm sm:text-5xl md:text-6xl lg:text-7xl">
-              Jasa MC Wedding Profesional di Jabodetabek
-            </h1>
-            <p className="max-w-2xl text-lg text-gray-100 text-shadow-sm md:text-xl">
-              Riswandi Wedding membantu menyusun alur acara yang hangat,
-              terarah, dan berkesan untuk pernikahan maupun acara formal Anda.
-            </p>
-            <div className="flex flex-col gap-4 pt-6 sm:flex-row">
-              <Button asChild size="lg" className="h-12 px-8 text-base">
-                <Link href="/layanan-mc">Jelajahi Paket MC</Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => openMcDialog()}
-                className="h-12 border-white/50 bg-black/20 px-8 text-base text-white backdrop-blur hover:bg-white hover:text-black"
-              >
-                Booking Sekarang
-              </Button>
+        <section className="relative overflow-hidden pb-16 pt-7 sm:pb-20 sm:pt-10 lg:pb-24 lg:pt-12">
+          <div className="site-container grid items-center gap-10 lg:grid-cols-[1.02fr_.98fr] lg:gap-12">
+            <div className="relative z-10 w-full max-w-[calc(100vw-2rem)] lg:max-w-none">
+              <span className="section-eyebrow">MC Wedding & Undangan Digital</span>
+              <h1 className="display-title mt-5 max-w-[11ch] text-[3.35rem] text-primary sm:max-w-none sm:text-[4.8rem] lg:text-[6.7rem] xl:text-[7.6rem]">
+                Momen besar,
+                <br />dibawakan <span className="block text-[#d98065] italic sm:inline">dengan hangat.</span>
+              </h1>
+              <p className="mt-6 w-full max-w-[calc(100vw-2rem)] text-base leading-8 text-muted-foreground sm:max-w-xl sm:text-lg">
+                {brandName} membantu acara Anda terasa rapi tanpa menjadi kaku—dengan MC yang peka pada suasana dan undangan digital yang berkesan sejak pertama dibuka.
+              </p>
+              <div className="mt-8 flex w-full max-w-[calc(100vw-2rem)] flex-col gap-3 sm:max-w-xl sm:flex-row sm:flex-wrap">
+                <Button asChild size="lg">
+                  <Link href="/layanan-mc">Lihat Paket & Cek Jadwal <ArrowRight className="size-4" /></Link>
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => openMcDialog()}>
+                  Konsultasi Acara Gratis
+                </Button>
+              </div>
+              <div className="mt-9 flex items-center gap-4">
+                <div className="flex -space-x-2" aria-hidden="true">
+                  {data.testimonials.slice(0, 3).map((testimonial) => (
+                    <span key={testimonial.id} className="relative grid size-10 overflow-hidden rounded-full border-3 border-background bg-secondary text-xs font-bold text-primary sm:size-11">
+                      {testimonial.photo_url ? (
+                        <Image src={resolvePublicStorageUrl("gallery", testimonial.photo_url) ?? testimonial.photo_url} alt="" fill sizes="44px" className="object-cover" />
+                      ) : (
+                        <span className="m-auto">{testimonial.client_name.slice(0, 1).toUpperCase()}</span>
+                      )}
+                    </span>
+                  ))}
+                  {data.testimonials.length === 0 ? (
+                    <><span className="grid size-10 place-items-center rounded-full border-3 border-background bg-secondary text-xs font-bold text-primary sm:size-11">W</span><span className="grid size-10 place-items-center rounded-full border-3 border-background bg-[#f1c875] text-xs font-bold text-primary sm:size-11">C</span><span className="grid size-10 place-items-center rounded-full border-3 border-background bg-[#d98065] text-xs font-bold text-white sm:size-11">P</span></>
+                  ) : null}
+                </div>
+                <p className="text-xs leading-5 text-muted-foreground sm:text-sm">
+                  <strong className="block text-foreground">★★★★★ {averageRating} dari klien</strong>
+                  Wedding · Corporate · Private Event
+                </p>
+              </div>
+            </div>
+
+            <div className="relative mx-auto h-[29rem] w-full max-w-[35rem] sm:h-[36rem] lg:h-[40rem]">
+              <div className="absolute inset-x-[11%] bottom-0 top-3 overflow-hidden rounded-[9rem_9rem_2rem_2rem] shadow-[0_28px_60px_rgba(37,68,47,.18)] sm:rounded-[12rem_12rem_2.2rem_2.2rem]">
+                <Image src="https://images.unsplash.com/photo-1519741497674-611481863552?q=85&w=1100&auto=format&fit=crop" alt="Pasangan menikmati momen pernikahan yang hangat" fill sizes="(max-width: 1024px) 90vw, 45vw" className="object-cover saturate-[.82]" priority />
+              </div>
+              <div className="absolute bottom-8 left-0 h-36 w-28 overflow-hidden rounded-[5rem_5rem_1.25rem_1.25rem] border-[6px] border-background shadow-lg sm:h-48 sm:w-40 sm:border-8">
+                <Image src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=500&auto=format&fit=crop" alt="Dekorasi pernikahan elegan" fill sizes="160px" className="object-cover" />
+              </div>
+              <div className="absolute right-0 top-7 grid size-28 rotate-6 place-items-center rounded-full bg-[#f1c875] p-4 text-center font-heading text-base font-semibold leading-tight text-primary shadow-lg sm:size-38 sm:p-7 sm:text-xl">
+                Warm, joyful & memorable
+              </div>
+              <div className="absolute -bottom-3 right-4 -z-10 size-32 rounded-[42%_58%_63%_37%/56%_42%_58%_44%] bg-secondary sm:size-40" />
             </div>
           </div>
         </section>
@@ -617,40 +482,35 @@ export default function HomePageClient({ data }: HomePageClientProps) {
         <section
           id="tentang"
           aria-labelledby="tentang-riswandi-wedding"
-          className="border-b bg-muted/30 py-14 md:py-18"
+          className="section-shell scroll-mt-28"
         >
-          <div className="container mx-auto grid gap-8 px-4 md:grid-cols-[0.8fr_1.2fr] md:items-start">
+          <div className="site-container relative grid gap-7 overflow-hidden rounded-[2rem] bg-secondary p-7 sm:p-10 md:grid-cols-[.82fr_1.18fr] md:gap-12 lg:p-16">
+            <div className="pointer-events-none absolute -bottom-24 -right-20 size-72 rounded-full border-[3.5rem] border-[#c1d3b9]" />
             <div className="space-y-3">
-              <Badge variant="outline">Tentang Kami</Badge>
+              <span className="section-eyebrow">Tentang Kami</span>
               <h2
                 id="tentang-riswandi-wedding"
-                className="font-heading text-3xl font-bold text-primary md:text-4xl"
+                className="display-title text-[2.75rem] text-primary sm:text-[3.8rem] lg:text-[5rem]"
               >
-                Pendamping Acara dari Persiapan hingga Hari H
+                Tenang menikmati momen, kami jaga alurnya.
               </h2>
             </div>
-            <div className="space-y-5 text-base leading-7 text-muted-foreground">
-              <p>
-                Riswandi Wedding menyediakan jasa MC wedding dan MC all event
-                untuk membantu acara berjalan sesuai rundown tanpa kehilangan
-                suasana akrab. Area layanan utama kami mencakup Jabodetabek dan
-                sekitarnya, sementara kebutuhan luar kota dapat dikonsultasikan.
+            <div className="relative z-10 space-y-5 text-base leading-8 text-[#58675d]">
+              <p className="text-lg text-primary sm:text-xl">
+                Anda seharusnya hadir sepenuhnya di hari istimewa—bukan sibuk mengkhawatirkan transisi, suasana, atau detail yang terlewat.
               </p>
               <p>
-                Selain layanan MC, tersedia undangan digital dengan beragam
-                pilihan tampilan. Anda dapat membandingkan paket, melihat
-                dokumentasi acara, membaca testimoni klien, dan menemukan
-                jawaban pemesanan sebelum menghubungi tim kami.
+                Kami menyiapkan alur MC yang personal, berkoordinasi dengan pihak terkait, dan menyediakan undangan digital yang praktis dibagikan. Layanan utama mencakup Jabodetabek; kebutuhan luar kota dapat dikonsultasikan.
               </p>
-              <div className="flex flex-wrap gap-x-5 gap-y-3 font-medium text-primary">
-                <Link href="/layanan-mc" className="underline-offset-4 hover:underline">
-                  Pelajari paket jasa MC
+              <div className="flex flex-wrap gap-2 text-xs font-bold text-primary">
+                <Link href="/layanan-mc" className="rounded-full bg-white/60 px-4 py-2.5 transition-colors hover:bg-white">
+                  Paket jasa MC
                 </Link>
-                <Link href="/undangan-digital" className="underline-offset-4 hover:underline">
-                  Lihat pilihan undangan digital
+                <Link href="/undangan-digital" className="rounded-full bg-white/60 px-4 py-2.5 transition-colors hover:bg-white">
+                  Undangan digital
                 </Link>
-                <Link href="/faq" className="underline-offset-4 hover:underline">
-                  Baca FAQ pemesanan
+                <Link href="/faq" className="rounded-full bg-white/60 px-4 py-2.5 transition-colors hover:bg-white">
+                  FAQ pemesanan
                 </Link>
               </div>
             </div>
@@ -659,29 +519,31 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
         <section
           id="layanan"
-          className="container mx-auto scroll-mt-16 px-4 py-16 md:py-24"
+          className="site-container section-shell scroll-mt-28"
         >
-          <div className="mb-16 space-y-4 text-center">
-            <h2 className="font-heading text-3xl font-bold text-primary md:text-4xl">
-              Layanan MC
-            </h2>
-            <p className="mx-auto max-w-2xl text-muted-foreground">
-              Beragam pilihan paket Master of Ceremony yang dapat disesuaikan
-              dengan kebutuhan acara Anda.
+          <div className="mb-10 grid gap-5 md:mb-12 md:grid-cols-[1fr_.55fr] md:items-end md:gap-10">
+            <div>
+              <span className="section-eyebrow">Layanan Kami</span>
+              <h2 className="display-title mt-4 text-[2.9rem] text-primary sm:text-[4.1rem] lg:text-[5.5rem]">
+                Satu panggung,<br />banyak cerita.
+              </h2>
+            </div>
+            <p className="max-w-lg text-muted-foreground">
+              Pilih format MC yang paling sesuai dengan karakter acara, jumlah tamu, dan suasana yang ingin Anda ciptakan.
             </p>
           </div>
 
           {data.services.length > 0 ? (
             <div className="space-y-10">
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                {data.services.slice(0, 3).map((service) => (
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+                {data.services.slice(0, 3).map((service, serviceIndex) => (
                   <Card
                     key={service.slug}
                     className={cn(
-                      "flex flex-col transition-colors shadow-sm hover:border-primary hover:shadow-md",
+                      "flex flex-col p-1 hover:-translate-y-1.5 hover:border-primary/50 hover:shadow-[0_24px_50px_rgba(37,68,47,.14)]",
                       service.is_featured
-                        ? "relative overflow-hidden border-primary/40 shadow-md"
-                        : "border-primary/20",
+                        ? "relative overflow-hidden border-primary bg-primary text-white md:rotate-1 md:hover:rotate-0"
+                        : "border-border bg-card",
                     )}
                   >
                     {service.badge_variant === "best_value" ? (
@@ -690,6 +552,9 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       </div>
                     ) : null}
                     <CardHeader>
+                      <span className={cn("mb-3 grid size-13 place-items-center rounded-2xl bg-secondary font-heading text-xl text-primary", service.is_featured && "bg-[#c8dc9d]")}>
+                        {String(serviceIndex + 1).padStart(2, "0")}
+                      </span>
                       {service.badge_label ? (
                         <div className="mb-2 flex justify-between">
                           <Badge
@@ -702,18 +567,18 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                           </Badge>
                         </div>
                       ) : null}
-                      <CardTitle className="font-heading text-2xl">
+                      <CardTitle className="font-heading text-3xl leading-none">
                         {service.title}
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className={cn("leading-6", service.is_featured && "text-white/70")}>
                         {service.short_description}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-1">
-                      <ul className="space-y-3 text-sm text-muted-foreground">
+                      <ul className={cn("space-y-3 border-t border-border pt-5 text-sm text-muted-foreground", service.is_featured && "border-white/15 text-white/75")}>
                         {service.features.map((feature) => (
                           <li key={feature} className="flex items-start gap-2">
-                            <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <CheckCircle className={cn("mt-0.5 h-4 w-4 shrink-0 text-primary", service.is_featured && "text-[#c8dc9d]")} />
                             <span>{feature}</span>
                           </li>
                         ))}
@@ -721,10 +586,10 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                     </CardContent>
                     <CardFooter>
                       <Button
-                        className="w-full"
+                        className={cn("w-full", service.is_featured && "border-[#91a96e] bg-gradient-to-b from-[#e0edbf] via-[#c8dc9d] to-[#a8c477] text-primary shadow-[inset_0_1px_0_rgba(255,255,255,.7),inset_0_-2px_0_rgba(49,92,70,.18),0_5px_0_#789652,0_9px_20px_rgba(0,0,0,.2)] hover:from-[#e7f2ca] hover:via-[#d3e5ac] hover:to-[#b4cd83] active:shadow-[inset_0_2px_4px_rgba(49,92,70,.18),0_1px_0_#789652]")}
                         onClick={() => openMcDialog(service.title)}
                       >
-                        Booking Sekarang
+                        Cek Jadwal Paket
                       </Button>
                     </CardFooter>
                   </Card>
@@ -743,31 +608,31 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
-              Data layanan belum tersedia saat ini.
+            <div className="empty-state">
+              <strong className="font-heading text-xl text-foreground">Paket sedang diperbarui</strong>
+              <span>Silakan konsultasi langsung agar kami dapat merekomendasikan layanan sesuai acara Anda.</span>
             </div>
           )}
         </section>
 
         <section
           id="undangan"
-          className="w-full scroll-mt-16 bg-muted/40 py-16 md:py-24"
+          className="section-shell w-full scroll-mt-28 bg-card"
         >
-          <div className="container mx-auto px-4">
-            <div className="mb-16 space-y-4 text-center">
-              <Badge className="mb-2" variant="outline">
-                Koleksi Template Premium
-              </Badge>
-              <h2 className="font-heading text-3xl font-bold text-primary md:text-4xl">
-                Undangan Digital
-              </h2>
-              <p className="mx-auto max-w-2xl text-muted-foreground">
-                Sebarkan momen kebahagiaan Anda dengan mudah, elegan, dan ramah
-                lingkungan.
-              </p>
-              <div className="mx-auto mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-100/50 px-5 py-2.5 text-sm font-medium text-amber-700">
-                <Info className="h-4 w-4" />
-                <span>Pemesanan minimal 7 hari sebelum tanggal acara</span>
+          <div className="site-container">
+            <div className="mb-10 grid gap-5 md:mb-12 md:grid-cols-[1fr_.55fr] md:items-end md:gap-10">
+              <div>
+                <span className="section-eyebrow">Koleksi Template Premium</span>
+                <h2 className="display-title mt-4 text-[2.9rem] text-primary sm:text-[4.1rem] lg:text-[5.5rem]">
+                  Undangan Digital
+                </h2>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Kesan pertama hari bahagia dimulai dari undangan yang cantik, mudah dibuka, dan nyaman dibagikan kepada siapa pun.</p>
+                <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#f7e7bd] px-4 py-2.5 text-xs font-semibold text-[#715720]">
+                  <Info className="h-4 w-4" />
+                  <span>Pesan minimal 7 hari sebelum acara</span>
+                </div>
               </div>
             </div>
 
@@ -780,7 +645,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   return (
                     <Card
                       key={template.slug}
-                      className="group flex flex-col overflow-hidden border bg-background shadow-sm transition-all duration-300 hover:shadow-lg"
+                      className="group flex flex-col overflow-hidden bg-background p-0 hover:-translate-y-1.5 hover:shadow-[0_22px_44px_rgba(37,68,47,.14)]"
                     >
                       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
                         {previewSrc ? (
@@ -793,8 +658,8 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                             className="object-cover transition-transform duration-700 group-hover:scale-110"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center px-4 text-center text-xs text-muted-foreground">
-                            Preview belum tersedia
+                          <div className="flex h-full w-full items-center justify-center bg-secondary/45 px-4 text-center text-xs text-muted-foreground">
+                            Pratinjau sedang disiapkan
                           </div>
                         )}
                       </div>
@@ -841,14 +706,14 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                             className="w-full text-[10px] opacity-70 md:text-xs"
                             disabled
                           >
-                            Proses
+                            Segera hadir
                           </Button>
                         )}
                         <Button
                           className="w-full text-[10px] md:text-xs"
                           onClick={() => openInvitationDialog(template.name)}
                         >
-                          Pesan
+                          Pilih
                         </Button>
                       </CardFooter>
                     </Card>
@@ -856,43 +721,44 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 })}
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-border bg-background p-10 text-center text-muted-foreground">
-                Template undangan belum tersedia saat ini.
+              <div className="empty-state">
+                <strong className="font-heading text-xl text-foreground">Koleksi sedang diperbarui</strong>
+                <span>Hubungi kami untuk melihat pilihan desain terbaru yang tersedia.</span>
               </div>
             )}
 
             <div className="mt-12 text-center">
               <Button
                 size="lg"
-                className="h-14 px-10 text-lg shadow-lg transition-transform hover:scale-105"
+                className="px-8"
                 onClick={() => openInvitationDialog()}
               >
-                Pesan Undangan Sekarang
+                Pilih Desain & Mulai Pesan
               </Button>
             </div>
           </div>
         </section>
 
-        <section className="container mx-auto px-4 py-16 md:py-24">
-          <div className="mb-16 space-y-4 text-center">
-            <h2 className="font-heading text-3xl font-bold text-primary md:text-4xl">
+        <section className="section-shell bg-[#f1c875]">
+          <div className="site-container">
+          <div className="mb-10 md:mb-12">
+            <span className="section-eyebrow">Mudah, cepat & transparan</span>
+            <h2 className="display-title mt-4 text-[2.9rem] text-primary sm:text-[4.1rem] lg:text-[5.5rem]">
               Cara Memesan
             </h2>
-            <p className="text-muted-foreground">
-              Proses booking mudah, cepat, dan transparan.
+            <p className="mt-4 max-w-xl text-[#65572f]">
+              Tiga langkah sederhana menuju acara yang lebih tenang dan terarah.
             </p>
           </div>
 
-          <div className="relative mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="absolute top-[4.5rem] left-[16%] right-[16%] -z-10 hidden h-0.5 bg-border md:block" />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 
-            <div className="flex flex-col items-center space-y-5 bg-background p-6 text-center">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full border border-primary/20 bg-primary/5 shadow-sm">
-                <CalendarIcon className="h-10 w-10 text-primary" />
-              </div>
-              <div className="space-y-2">
+            <div className="rounded-[1.75rem] bg-[#fff9e7] p-7">
+              <div className="grid size-13 place-items-center rounded-full border border-[#d8ac56] bg-[#f1c875] font-heading text-xl">01</div>
+              <div className="mt-6 space-y-2">
+                <CalendarIcon className="h-7 w-7 text-primary" />
                 <h3 className="font-heading text-xl font-bold">
-                  1. Pilih Layanan
+                  Pilih Layanan
                 </h3>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   Pilih paket MC atau template undangan digital yang Anda
@@ -901,49 +767,51 @@ export default function HomePageClient({ data }: HomePageClientProps) {
               </div>
             </div>
 
-            <div className="flex flex-col items-center space-y-5 bg-background p-6 text-center">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full border border-primary/20 bg-primary/5 shadow-sm">
-                <MessageCircle className="h-10 w-10 text-primary" />
-              </div>
-              <div className="space-y-2">
+            <div className="rounded-[1.75rem] bg-[#d98065] p-7 text-white md:translate-y-4">
+              <div className="grid size-13 place-items-center rounded-full bg-[#fff2e7] font-heading text-xl text-[#d98065]">02</div>
+              <div className="mt-6 space-y-2">
+                <MessageCircle className="h-7 w-7" />
                 <h3 className="font-heading text-xl font-bold">
-                  2. Isi Form dan Chat WA
+                  Isi Form & Chat WA
                 </h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-relaxed text-white/75">
                   Isi formulir singkat yang disediakan, lalu Anda akan diarahkan
                   ke WhatsApp untuk konfirmasi.
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col items-center space-y-5 bg-background p-6 text-center">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full border border-primary/20 bg-primary/5 shadow-sm">
-                <CheckCircle className="h-10 w-10 text-primary" />
-              </div>
-              <div className="space-y-2">
+            <div className="rounded-[1.75rem] bg-primary p-7 text-white">
+              <div className="grid size-13 place-items-center rounded-full bg-[#c8dc9d] font-heading text-xl text-primary">03</div>
+              <div className="mt-6 space-y-2">
+                <CheckCircle className="h-7 w-7 text-[#c8dc9d]" />
                 <h3 className="font-heading text-xl font-bold">
-                  3. Konfirmasi dan Deal
+                  Konfirmasi & Deal
                 </h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-relaxed text-white/70">
                   Tim kami akan follow up. Setelah DP dikonfirmasi, jadwal atau
                   pesanan Anda kami proses.
                 </p>
               </div>
             </div>
           </div>
+          </div>
         </section>
 
         <section
           id="testimoni"
-          className="scroll-mt-16 bg-primary py-16 text-primary-foreground md:py-24"
+          className="section-shell scroll-mt-28 bg-primary text-primary-foreground"
         >
-          <div className="container mx-auto px-4">
-            <div className="mb-16 space-y-4 text-center">
-              <h2 className="font-heading text-3xl font-bold text-white md:text-4xl">
-                Apa Kata Klien Kami
-              </h2>
-              <p className="mx-auto max-w-2xl text-primary-foreground/80">
-                Kepuasan Anda adalah prioritas utama kami dalam setiap acara.
+          <div className="site-container">
+            <div className="mb-10 grid gap-5 md:mb-12 md:grid-cols-[1fr_.55fr] md:items-end">
+              <div>
+                <span className="section-eyebrow text-[#c8dc9d]">Cerita dari klien</span>
+                <h2 className="display-title mt-4 text-[2.9rem] text-white sm:text-[4.1rem] lg:text-[5.5rem]">
+                  Kata mereka,<br />tentang kami.
+                </h2>
+              </div>
+              <p className="max-w-2xl text-primary-foreground/70">
+                Bukan sekadar acara selesai tepat waktu—tetapi momen yang terasa nyaman bagi keluarga dan tamu.
               </p>
             </div>
 
@@ -959,7 +827,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       className="basis-full pl-2 md:basis-1/2 md:pl-4 lg:basis-1/3"
                     >
                       <div className="h-full p-1">
-                        <Card className="flex h-full flex-col border-none bg-white/10 text-white shadow-md backdrop-blur-md transition-colors hover:bg-white/15">
+                        <Card className="flex h-full flex-col border-white/15 bg-white/10 text-white shadow-[0_18px_45px_rgba(0,0,0,.12)] backdrop-blur-md transition-colors hover:bg-white/15">
                           <CardHeader className="pb-4">
                             <div className="mb-3 flex gap-1">
                               {Array.from({ length: 5 }).map((_, index) => (
@@ -1039,8 +907,8 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 </div>
               </Carousel>
             ) : (
-              <div className="rounded-2xl border border-white/20 bg-white/5 p-10 text-center text-white/70">
-                Testimoni belum tersedia saat ini.
+              <div className="rounded-[1.75rem] border border-dashed border-white/25 bg-white/5 p-10 text-center text-white/70">
+                Cerita klien akan segera hadir di sini.
               </div>
             )}
           </div>
@@ -1048,15 +916,15 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
         <section
           id="galeri"
-          className="container mx-auto scroll-mt-16 px-4 py-16 md:py-24"
+          className="section-shell scroll-mt-28 bg-primary text-white"
         >
-          <div className="mb-12 space-y-4 text-center">
-            <h2 className="font-heading text-3xl font-bold text-primary md:text-4xl">
-              Galeri dan Dokumentasi
-            </h2>
-            <p className="text-muted-foreground">
-              Beberapa momen indah yang telah kami abadikan bersama.
-            </p>
+          <div className="site-container">
+          <div className="mb-10 grid gap-5 md:mb-12 md:grid-cols-[1fr_.55fr] md:items-end">
+            <div>
+              <span className="section-eyebrow text-[#c8dc9d]">Momen pilihan</span>
+              <h2 className="display-title mt-4 text-[2.9rem] sm:text-[4.1rem] lg:text-[5.5rem]">Galeri &<br />Dokumentasi</h2>
+            </div>
+            <p className="text-white/70">Lihat bagaimana setiap detail, ekspresi, dan energi acara dirangkai menjadi kenangan yang layak disimpan.</p>
           </div>
 
           <div className="grid auto-rows-[180px] grid-cols-2 gap-4 sm:auto-rows-[250px] md:grid-cols-4">
@@ -1070,7 +938,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   <div
                     key={item.id}
                     className={cn(
-                      "relative overflow-hidden rounded-xl shadow-sm group",
+                      "relative overflow-hidden rounded-[1.5rem] shadow-sm group",
                       isLarge && "col-span-2 row-span-2",
                       isTall && "row-span-2",
                       isWide && "col-span-2",
@@ -1083,8 +951,8 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 via-transparent to-transparent p-6 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      <span className="font-heading text-lg font-medium text-white">
+                    <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/65 via-transparent to-transparent p-3 sm:p-5">
+                      <span className="rounded-xl bg-white/90 px-3 py-2 font-heading text-sm font-semibold text-primary backdrop-blur sm:text-lg">
                         {item.title}
                       </span>
                     </div>
@@ -1099,7 +967,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 );
               })
             ) : (
-              <div className="col-span-full flex flex-col items-center py-20 text-center text-muted-foreground">
+              <div className="col-span-full flex flex-col items-center py-20 text-center text-white/65">
                 <Camera className="mb-4 h-12 w-12 opacity-20" />
                 <p>Belum ada dokumentasi acara yang diunggah.</p>
               </div>
@@ -1107,7 +975,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           </div>
 
           <div className="mt-12 text-center">
-            <Button variant="outline" size="lg" className="group rounded-full px-8" asChild>
+            <Button variant="outline" size="lg" className="group" asChild>
               <a
                 href={instagramUrl}
                 target="_blank"
@@ -1118,31 +986,29 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 <Camera className="ml-2 h-4 w-4 transition-colors group-hover:text-pink-600" />
               </a>
             </Button>
-            <Button variant="ghost" size="lg" className="ml-2 rounded-full px-8" asChild>
+            <Button variant="ghost" size="lg" className="mt-3 text-white hover:bg-white/10 hover:text-white sm:ml-2 sm:mt-0" asChild>
               <Link href="/galeri">Buka Halaman Galeri</Link>
             </Button>
+          </div>
           </div>
         </section>
 
         <section
           id="faq"
-          className="w-full scroll-mt-16 border-y bg-muted/30 py-16 md:py-24"
+          className="section-shell w-full scroll-mt-28"
         >
-          <div className="container mx-auto max-w-3xl px-4">
-            <div className="mb-12 space-y-4 text-center">
-              <h2 className="font-heading text-3xl font-bold text-primary md:text-4xl">
-                Pertanyaan yang Sering Diajukan
-              </h2>
-              <p className="text-muted-foreground">
-                Jawaban dari pertanyaan yang paling sering diajukan kepada kami.
-              </p>
+          <div className="site-container grid gap-9 lg:grid-cols-[.72fr_1.28fr] lg:gap-16">
+            <div>
+              <span className="section-eyebrow">Tanya jawab</span>
+              <h2 className="display-title mt-4 text-[2.9rem] text-primary sm:text-[4rem] lg:text-[5rem]">Yang sering ditanyakan sebelum memesan.</h2>
+              <p className="mt-5 text-muted-foreground">Masih ada yang ingin dipastikan? Konsultasikan langsung—kami akan membantu tanpa membuat Anda merasa terburu-buru.</p>
             </div>
-
+            <div>
             {data.faqs.length > 0 ? (
               <Accordion
                 type="single"
                 collapsible
-                className="w-full rounded-2xl border bg-background px-6 py-2 shadow-sm"
+                className="w-full rounded-[1.5rem] border bg-card px-5 py-2 shadow-[0_18px_40px_rgba(37,68,47,.08)] sm:px-6"
               >
                 {data.faqs.map((faq, index) => (
                   <AccordionItem
@@ -1164,8 +1030,8 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 ))}
               </Accordion>
             ) : (
-              <div className="rounded-2xl border border-dashed border-border bg-background p-10 text-center text-muted-foreground">
-                FAQ belum tersedia saat ini.
+              <div className="empty-state">
+                FAQ sedang diperbarui. Hubungi kami untuk jawaban langsung.
               </div>
             )}
             <div className="mt-8 text-center">
@@ -1173,131 +1039,13 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 <Link href="/faq">Baca Semua FAQ</Link>
               </Button>
             </div>
+            </div>
           </div>
         </section>
       </main>
 
-      <footer id="kontak" className="scroll-mt-16 bg-[#1a1a1a] py-16 text-white">
-        <div className="container mx-auto grid grid-cols-1 gap-12 px-4 md:grid-cols-12 lg:gap-8">
-          <div className="space-y-6 md:col-span-5">
-            <h3 className="font-heading text-3xl font-bold tracking-tight">
-              {brandName}
-            </h3>
-            <p className="max-w-sm text-[15px] leading-relaxed text-white/60">
-              Menyediakan layanan MC profesional dan undangan digital elegan
-              untuk menyempurnakan dan mengabadikan momen bahagia di hari
-              istimewa Anda di Jabodetabek dan sekitarnya.
-            </p>
-          </div>
-
-          <div className="space-y-6 md:col-span-3">
-            <h4 className="font-heading text-lg font-semibold tracking-wide">
-              Tautan Cepat
-            </h4>
-            <nav className="flex flex-col gap-3 text-[15px] text-white/60">
-              <Link
-                href="/layanan-mc"
-                className="w-fit transition-colors hover:text-white"
-              >
-                Layanan MC
-              </Link>
-              <Link
-                href="/layanan-mc"
-                className="w-fit transition-colors hover:text-white"
-              >
-                Detail Paket MC
-              </Link>
-              <Link
-                href="/undangan-digital"
-                className="w-fit transition-colors hover:text-white"
-              >
-                Undangan Digital
-              </Link>
-              <Link
-                href="/galeri"
-                className="w-fit transition-colors hover:text-white"
-              >
-                Galeri Dokumentasi
-              </Link>
-              <Link
-                href="/faq"
-                className="w-fit transition-colors hover:text-white"
-              >
-                FAQ
-              </Link>
-            </nav>
-          </div>
-
-          <div className="space-y-6 md:col-span-4">
-            <h4 className="font-heading text-lg font-semibold tracking-wide">
-              Hubungi Kami
-            </h4>
-            <div className="flex flex-col gap-4 text-[15px] text-white/60">
-              <div className="flex items-start gap-3">
-                <Phone className="mt-0.5 h-5 w-5 shrink-0" />
-                <a
-                  href={buildWhatsAppUrl(waNumber, getGeneralQuestionMessage())}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-white"
-                  onClick={() => trackEvent("whatsapp_click", { location: "footer" })}
-                >
-                  +{waNumber}
-                </a>
-              </div>
-              {email ? (
-                <div className="flex items-start gap-3">
-                  <Mail className="mt-0.5 h-5 w-5 shrink-0" />
-                  <a
-                    href={`mailto:${email}`}
-                    className="transition-colors hover:text-white"
-                    onClick={() => trackEvent("email_click", { location: "footer" })}
-                  >
-                    {email}
-                  </a>
-                </div>
-              ) : null}
-              <div className="flex items-start gap-3">
-                <Camera className="mt-0.5 h-5 w-5 shrink-0" />
-                <a
-                  href={instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-white"
-                  onClick={() => trackEvent("instagram_click", { location: "footer" })}
-                >
-                  {getInstagramLabel(instagramUrl)}
-                </a>
-              </div>
-              {address ? (
-                <div className="text-sm leading-relaxed text-white/50">
-                  {address}
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-        <div className="container mx-auto mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 px-4 pt-8 text-sm text-white/40 md:flex-row">
-          <p>
-            &copy; {new Date().getFullYear()} {brandName}. All rights reserved.
-          </p>
-          <p>Melayani Jabodetabek dan kebutuhan luar kota sesuai kesepakatan.</p>
-        </div>
-      </footer>
-
-      <a
-        href={buildWhatsAppUrl(waNumber, getGeneralQuestionMessage())}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Chat Riswandi Wedding melalui WhatsApp"
-        onClick={() => trackEvent("whatsapp_click", { location: "floating_button" })}
-        className="group fixed right-6 bottom-6 z-50 flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3.5 text-white shadow-xl transition-all hover:-translate-y-1 hover:bg-[#20bd5a] hover:shadow-2xl"
-      >
-        <MessageCircle className="h-6 w-6" />
-        <span className="hidden text-[15px] font-medium sm:inline">
-          Chat Kami via WhatsApp
-        </span>
-      </a>
+      <PublicFooter settings={data.settings} />
+      <FloatingWhatsappButton settings={data.settings} />
 
       <Dialog open={isMCOpen} onOpenChange={setIsMCOpen}>
         <DialogFormContent
@@ -1428,7 +1176,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="mc-notes">Catatan Tambahan</Label>
-            <textarea
+            <Textarea
               id="mc-notes"
               name="notes"
               rows={4}
@@ -1440,7 +1188,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   notes: event.target.value,
                 }))
               }
-              className="min-h-24 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="min-h-28"
             />
           </div>
           {mcError ? (
@@ -1631,7 +1379,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="invitation-notes">Catatan Tambahan</Label>
-            <textarea
+            <Textarea
               id="invitation-notes"
               name="notes"
               rows={4}
@@ -1643,7 +1391,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   notes: event.target.value,
                 }))
               }
-              className="min-h-24 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="min-h-28"
             />
           </div>
           {invitationError ? (

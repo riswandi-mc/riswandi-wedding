@@ -29,7 +29,7 @@ async function DashboardLayoutInner({
           avatar: "/avatars/shadcn.jpg",
         }}
       />
-      <SidebarInset>
+      <SidebarInset className="admin-surface">
         {children}
       </SidebarInset>
     </SidebarProvider>

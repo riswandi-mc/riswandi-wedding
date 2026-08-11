@@ -31,17 +31,18 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="border-0 bg-transparent shadow-none">
         <CardHeader>
-          <CardTitle>Login Admin</CardTitle>
+          <span className="section-eyebrow">Akses terbatas</span>
+          <CardTitle className="display-title mt-3 text-4xl text-primary">Masuk ke dashboard.</CardTitle>
           <CardDescription>
-            Masuk menggunakan akun admin Supabase yang sudah terdaftar.
+            Gunakan akun admin Supabase yang telah terdaftar untuk melanjutkan.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={formAction}>
             {state?.error && (
-              <div className="mb-4 rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+              <div role="alert" className="mb-4 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                 {state.error}
               </div>
             )}
@@ -52,7 +53,7 @@ export function LoginForm({
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="admin@riswandiwedding.com"
                   autoComplete="email"
                   disabled={pending}
                   required
@@ -72,11 +73,11 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <Button type="submit" disabled={pending}>
-                  {pending ? "Memproses..." : "Login"}
+                <Button type="submit" disabled={pending} aria-busy={pending} className="w-full">
+                  {pending ? "Memverifikasi..." : "Masuk ke Dashboard"}
                 </Button>
                 <FieldDescription className="text-center">
-                  Hanya akun dengan role `admin` atau `super_admin` yang bisa masuk.
+                  Hanya akun dengan peran admin atau super admin yang dapat masuk.
                 </FieldDescription>
               </Field>
             </FieldGroup>

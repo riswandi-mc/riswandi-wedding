@@ -124,19 +124,19 @@ export function AppSidebar({
   }
 }) {
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border" {...props}>
+      <SidebarHeader className="border-b border-sidebar-border/80 p-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground pointer-events-none">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
+            <SidebarMenuButton size="lg" className="pointer-events-none data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+              <div className="flex aspect-square size-9 items-center justify-center rounded-xl bg-primary text-sidebar-primary-foreground shadow-[0_3px_0_#0e2d22]">
                 <GalleryVerticalEndIcon className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
+                <span className="truncate font-heading text-base font-semibold">
                   Riswandi Wedding
                 </span>
-                <span className="truncate text-xs">Admin Dashboard</span>
+                <span className="truncate text-[10px] font-bold tracking-[.08em] text-muted-foreground uppercase">Admin Dashboard</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -146,7 +146,7 @@ export function AppSidebar({
         <NavMain items={data.navMain} title="Menu Utama" />
         <NavProjects projects={data.projects} title="Pintasan" />
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border/80 p-3">
         <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />

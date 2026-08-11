@@ -17,9 +17,8 @@ export default function OpenGraphImage() {
           display: "flex",
           position: "relative",
           overflow: "hidden",
-          background:
-            "linear-gradient(135deg, #f9f5ef 0%, #eadfce 55%, #d7c3a7 100%)",
-          color: "#30261d",
+          background: "linear-gradient(135deg, #f8f4ea 0%, #fffdf7 55%, #dce6d6 100%)",
+          color: "#24352c",
           padding: "72px 82px",
         }}
       >
@@ -31,7 +30,7 @@ export default function OpenGraphImage() {
             borderRadius: 999,
             right: -100,
             top: -110,
-            border: "2px solid rgba(111, 82, 51, 0.22)",
+            border: "70px solid rgba(200, 220, 157, 0.55)",
           }}
         />
         <div
@@ -42,7 +41,7 @@ export default function OpenGraphImage() {
             borderRadius: 999,
             right: 40,
             top: 35,
-            background: "rgba(111, 82, 51, 0.08)",
+            background: "rgba(217, 128, 101, 0.18)",
           }}
         />
         <div
@@ -60,7 +59,7 @@ export default function OpenGraphImage() {
               fontSize: 28,
               letterSpacing: 5,
               textTransform: "uppercase",
-              color: "#74583e",
+              color: "#315c46",
             }}
           >
             Riswandi Wedding
@@ -75,13 +74,13 @@ export default function OpenGraphImage() {
                 fontWeight: 700,
               }}
             >
-              MC Profesional &amp; Undangan Digital
+              Momen besar, dibawakan dengan hangat.
             </div>
             <div
               style={{
                 display: "flex",
                 fontSize: 30,
-                color: "#5f5143",
+                color: "#6c756d",
               }}
             >
               Acara hangat, terarah, dan berkesan di Jabodetabek
@@ -93,7 +92,7 @@ export default function OpenGraphImage() {
               width: 150,
               height: 6,
               borderRadius: 99,
-              background: "#74583e",
+              background: "#d98065",
             }}
           />
         </div>

@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -48,6 +49,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import type { AdminTestimonial } from "@/lib/data/admin";
@@ -252,7 +254,7 @@ export function TestimonialManager({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
+      <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -270,7 +272,7 @@ export function TestimonialManager({
         </div>
       </header>
 
-      <main className="flex-1 space-y-6 bg-muted/20 p-6">
+      <main className="admin-surface flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h1 className="font-heading text-2xl font-bold text-primary">
@@ -606,7 +608,7 @@ export function TestimonialManager({
           </div>
           <div className="grid gap-2">
             <Label htmlFor="testimonial-quote">Kutipan Testimoni</Label>
-            <textarea
+            <Textarea
               id="testimonial-quote"
               rows={5}
               className="flex min-h-[112px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -654,8 +656,7 @@ export function TestimonialManager({
           </div>
           <div className="grid gap-2 text-sm">
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={form.isActive}
                 onChange={(event) =>
                   setForm((current) => ({
@@ -667,8 +668,7 @@ export function TestimonialManager({
               Aktif di landing page
             </label>
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={form.isVerified}
                 onChange={(event) =>
                   setForm((current) => ({
