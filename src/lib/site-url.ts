@@ -4,8 +4,19 @@ function isLocalHostname(hostname: string) {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]"
 }
 
+function getVercelProductionUrl() {
+  const hostname =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
+    process.env.VERCEL_URL?.trim()
+
+  return hostname ? `https://${hostname}` : null
+}
+
 export function getSiteUrl() {
-  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || LOCAL_SITE_URL
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    getVercelProductionUrl() ||
+    LOCAL_SITE_URL
 
   let siteUrl: URL
 
