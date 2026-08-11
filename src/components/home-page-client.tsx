@@ -427,7 +427,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
           <div className="site-container grid items-center gap-10 lg:grid-cols-[1.02fr_.98fr] lg:gap-12">
             <div className="relative z-10 w-full max-w-[calc(100vw-2rem)] lg:max-w-none">
               <span className="section-eyebrow">MC Wedding & Undangan Digital</span>
-              <h1 className="display-title mt-5 max-w-[11ch] text-[3.35rem] text-primary sm:max-w-none sm:text-[4.8rem] lg:text-[6.7rem] xl:text-[7.6rem]">
+              <h1 className="display-title mt-5 max-w-[11ch] text-[2.65rem] text-primary sm:max-w-none sm:text-[3.8rem] lg:text-[5rem] xl:text-[5.75rem]">
                 Momen besar,
                 <br />dibawakan <span className="block text-[#d98065] italic sm:inline">dengan hangat.</span>
               </h1>
@@ -540,7 +540,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                   <Card
                     key={service.slug}
                     className={cn(
-                      "flex flex-col p-1 hover:-translate-y-1.5 hover:border-primary/50 hover:shadow-[0_24px_50px_rgba(37,68,47,.14)]",
+                      "flex flex-col hover:-translate-y-1.5 hover:border-primary/50 hover:shadow-[0_24px_50px_rgba(37,68,47,.14)]",
                       service.is_featured
                         ? "relative overflow-hidden border-primary bg-primary text-white md:rotate-1 md:hover:rotate-0"
                         : "border-border bg-card",

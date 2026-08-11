@@ -52,8 +52,8 @@ export function PublicHeader({ settings }: { settings: Settings }) {
           <span className="hidden text-[#c8dc9d] sm:inline">Jabodetabek & luar kota sesuai kesepakatan</span>
         </div>
       </div>
-      <header className="sticky top-0 z-40 bg-background/88 py-2.5 backdrop-blur-xl sm:py-3">
-        <div className="site-container relative flex min-h-16 items-center justify-between rounded-full border border-border bg-card/90 py-2 pl-3 pr-2 shadow-[0_8px_28px_rgba(37,68,47,.09)]">
+      <header className="sticky top-0 z-40 bg-transparent py-2.5 sm:py-3">
+        <div className="site-container relative flex min-h-16 items-center justify-between rounded-full border border-border bg-card/90 py-2 pl-3 pr-2 shadow-[0_8px_28px_rgba(37,68,47,.09)] backdrop-blur-xl">
           <Link href="/" className="flex min-w-0 items-center gap-2.5" aria-label={`${brandName} - beranda`}>
             <span className="grid size-11 shrink-0 place-items-center rounded-full bg-secondary/70">
               <Image src="/logo-no-bg.png" alt="" width={40} height={40} className="size-10 object-contain" priority />
