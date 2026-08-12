@@ -16,6 +16,7 @@ import { RootClientLayout } from "@/components/root-client-layout";
 import { getPublicHomepageData } from "@/lib/data/public";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { GoogleAnalytics } from "@/components/google-analytics";
 
 const displayFont = EB_Garamond({
   subsets: ["latin"],
@@ -148,6 +149,7 @@ export default async function RootLayout({
         </TooltipProvider>
         <Analytics />
         <SpeedInsights />
+        <GoogleAnalytics />
       </body>
     </html>
   );

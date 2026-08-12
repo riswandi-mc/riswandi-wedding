@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 
-import { GoogleAnalytics } from "@/components/google-analytics"
 import HomePageClient from "@/components/home-page-client"
 import { JsonLd } from "@/components/json-ld"
 import { getPublicHomepageData } from "@/lib/data/public"
@@ -31,7 +30,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <GoogleAnalytics />
       <JsonLd data={jsonLd} />
       <HomePageClient data={data} />
     </>

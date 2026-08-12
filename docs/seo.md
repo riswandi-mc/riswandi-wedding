@@ -63,6 +63,7 @@ Status audit terakhir: **11 Agustus 2026**.
 - [x] Favicon bisnis tersedia dan apple icon 180×180 dibuat melalui metadata image route.
 - [x] Dukungan meta verifikasi Google melalui env `GOOGLE_SITE_VERIFICATION` sudah tersedia tanpa menaruh token di source.
 - [x] File verifikasi Google yang tersedia dipublikasikan dari `public/` dan dapat diakses pada URL root.
+- [x] Web App Manifest (`manifest.ts`) dikonfigurasi untuk memenuhi best-practice Progressive Web App (PWA) Google.
 - [ ] **MANUAL —** Pilih metode verifikasi Search Console yang akan dipakai dan isi token env bila memilih meta tag.
 - [ ] **MANUAL —** Uji tampilan favicon, apple icon, dan social preview pada perangkat/platform nyata setelah deploy.
 

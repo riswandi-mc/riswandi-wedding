@@ -474,10 +474,10 @@ export default function HomePageClient({ data }: HomePageClientProps) {
 
             <div className="relative mx-auto h-[29rem] w-full max-w-[35rem] sm:h-[36rem] lg:h-[40rem]">
               <div className="absolute inset-x-[11%] bottom-0 top-3 overflow-hidden rounded-[9rem_9rem_2rem_2rem] shadow-[0_28px_60px_rgba(37,68,47,.18)] sm:rounded-[12rem_12rem_2.2rem_2.2rem]">
-                <Image src="https://images.unsplash.com/photo-1519741497674-611481863552?q=85&w=1100&auto=format&fit=crop" alt="Pasangan menikmati momen pernikahan yang hangat" fill sizes="(max-width: 1024px) 90vw, 45vw" className="object-cover saturate-[.82]" priority />
+                <Image src="https://images.unsplash.com/photo-1519741497674-611481863552?q=85&w=1100&auto=format&fit=crop" alt="Pasangan menikmati momen pernikahan yang hangat" fill sizes="(max-width: 1024px) 90vw, 45vw" className="object-cover saturate-[.82]" priority fetchPriority="high" />
               </div>
               <div className="absolute bottom-8 left-0 h-36 w-28 overflow-hidden rounded-[5rem_5rem_1.25rem_1.25rem] border-[6px] border-background shadow-lg sm:h-48 sm:w-40 sm:border-8">
-                <Image src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=500&auto=format&fit=crop" alt="Dekorasi pernikahan elegan" fill sizes="160px" className="object-cover" priority />
+                <Image src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=500&auto=format&fit=crop" alt="Dekorasi pernikahan elegan" fill sizes="160px" className="object-cover" priority fetchPriority="high" />
               </div>
               <div className="absolute right-0 top-7 grid size-28 rotate-6 place-items-center rounded-full bg-[#f1c875] p-4 text-center font-heading text-base font-semibold leading-tight text-primary shadow-lg sm:size-38 sm:p-7 sm:text-xl">
                 Warm, joyful & memorable
