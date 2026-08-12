@@ -20,6 +20,13 @@ export const metadata: Metadata = createPublicPageMetadata({
   title: pageTitle,
   description: pageDescription,
   path: "/tentang-kami",
+  keywords: [
+    "profil Riswandi Wedding",
+    "sejarah Riswandi Wedding",
+    "tim MC wedding profesional",
+    "nilai layanan MC pernikahan",
+    "karir MC wedding Jakarta",
+  ],
 })
 
 const values = [

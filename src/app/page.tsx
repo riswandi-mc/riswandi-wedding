@@ -15,6 +15,14 @@ export const metadata: Metadata = createPublicPageMetadata({
   description: SITE_DESCRIPTION,
   path: "/",
   absoluteTitle: true,
+  keywords: [
+    "jasa MC wedding Jakarta",
+    "MC pernikahan profesional Jabodetabek",
+    "undangan digital pernikahan elegan",
+    "MC resepsi pernikahan",
+    "wedding MC Jakarta Bogor Depok Tangerang Bekasi",
+    "pembawa acara pernikahan",
+  ],
 })
 
 export default async function HomePage() {

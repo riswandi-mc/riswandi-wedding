@@ -24,7 +24,20 @@ const mcFaqs = [
   { question: "Kapan sebaiknya booking?", answer: "Hubungi tim sedini mungkin agar jadwal tersedia dan persiapan rundown dapat dilakukan lebih matang." },
 ]
 
-export const metadata: Metadata = createPublicPageMetadata({ title: pageTitle, description: pageDescription, path: "/layanan-mc" })
+export const metadata: Metadata = createPublicPageMetadata({
+  title: pageTitle,
+  description: pageDescription,
+  path: "/layanan-mc",
+  keywords: [
+    "paket MC wedding",
+    "harga MC pernikahan",
+    "jasa MC wedding Jabodetabek",
+    "paket MC resepsi",
+    "MC akad nikah",
+    "MC acara formal Jakarta",
+    "tarif MC wedding profesional",
+  ],
+})
 
 function getServiceBadgeClass(variant: string | null, featured: boolean) {
   if (featured) return "border-white/25 bg-white/[0.08] text-[#c8dc9d]"

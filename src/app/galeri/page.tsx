@@ -21,7 +21,19 @@ export const dynamic = "force-dynamic"
 const pageTitle = "Galeri Acara dan Undangan Digital"
 const pageDescription = "Lihat galeri kategori wedding, acara formal, private event, dan undangan digital yang ditampilkan Riswandi Wedding."
 
-export const metadata: Metadata = createPublicPageMetadata({ title: pageTitle, description: pageDescription, path: "/galeri" })
+export const metadata: Metadata = createPublicPageMetadata({
+  title: pageTitle,
+  description: pageDescription,
+  path: "/galeri",
+  keywords: [
+    "galeri MC wedding",
+    "dokumentasi MC pernikahan",
+    "portofolio MC acara",
+    "foto wedding Jakarta",
+    "galeri undangan digital",
+    "dokumentasi acara pernikahan",
+  ],
+})
 
 function getGalleryPreview(item: { media_type: "image" | "video"; media_url: string; thumbnail_url: string | null }) {
   if (item.thumbnail_url) return resolvePublicStorageUrl("gallery", item.thumbnail_url) || item.thumbnail_url

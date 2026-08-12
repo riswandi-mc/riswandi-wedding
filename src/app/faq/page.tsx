@@ -20,6 +20,14 @@ export const metadata: Metadata = createPublicPageMetadata({
   title: pageTitle,
   description: pageDescription,
   path: "/faq",
+  keywords: [
+    "FAQ MC wedding",
+    "pertanyaan MC pernikahan",
+    "harga undangan digital",
+    "cara booking MC",
+    "revisi undangan digital",
+    "area layanan MC wedding",
+  ],
 })
 
 export default async function FaqPage() {

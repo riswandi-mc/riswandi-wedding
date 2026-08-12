@@ -22,7 +22,19 @@ export const dynamic = "force-dynamic"
 const pageTitle = "Undangan Digital Pernikahan Elegan"
 const pageDescription = "Pilih template undangan digital Riswandi Wedding, lihat demo dan harga, lalu pesan dengan proses yang jelas untuk persiapan pernikahan Anda."
 
-export const metadata: Metadata = createPublicPageMetadata({ title: pageTitle, description: pageDescription, path: "/undangan-digital" })
+export const metadata: Metadata = createPublicPageMetadata({
+  title: pageTitle,
+  description: pageDescription,
+  path: "/undangan-digital",
+  keywords: [
+    "template undangan digital",
+    "undangan digital web elegan",
+    "desain undangan pernikahan online",
+    "harga paket undangan digital",
+    "demo undangan pernikahan digital",
+    "buat undangan web murah",
+  ],
+})
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value)

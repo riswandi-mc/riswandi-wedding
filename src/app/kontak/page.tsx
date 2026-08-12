@@ -23,7 +23,19 @@ const pageTitle = "Kontak Riswandi Wedding"
 const pageDescription =
   "Hubungi Riswandi Wedding melalui WhatsApp, email, atau Instagram untuk konsultasi jasa MC dan undangan digital di Jabodetabek."
 
-export const metadata: Metadata = createPublicPageMetadata({ title: pageTitle, description: pageDescription, path: "/kontak" })
+export const metadata: Metadata = createPublicPageMetadata({
+  title: pageTitle,
+  description: pageDescription,
+  path: "/kontak",
+  keywords: [
+    "kontak MC wedding",
+    "hubungi MC pernikahan",
+    "konsultasi MC wedding Jakarta",
+    "WhatsApp MC wedding",
+    "booking MC acara Jabodetabek",
+    "konsultasi undangan digital",
+  ],
+})
 
 export default async function KontakPage() {
   const data = await getPublicHomepageData()
