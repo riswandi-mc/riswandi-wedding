@@ -14,6 +14,7 @@ import {
 } from "@/lib/seo";
 import { RootClientLayout } from "@/components/root-client-layout";
 import { getPublicHomepageData } from "@/lib/data/public";
+import { Analytics } from "@vercel/analytics/next"
 
 const displayFont = EB_Garamond({
   subsets: ["latin"],
@@ -132,6 +133,7 @@ export default async function RootLayout({
             {children}
           </RootClientLayout>
         </TooltipProvider>
+        <Analytics />
       </body>
     </html>
   );

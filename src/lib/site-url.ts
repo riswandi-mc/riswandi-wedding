@@ -13,6 +13,11 @@ function getVercelProductionUrl() {
 }
 
 export function getSiteUrl() {
+  // Use dynamic preview URL when running in Vercel's Preview environment
+  if (process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL) {
+    return new URL(`https://${process.env.VERCEL_URL}`)
+  }
+
   const vercelProductionUrl = getVercelProductionUrl()
   const configuredUrl =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||

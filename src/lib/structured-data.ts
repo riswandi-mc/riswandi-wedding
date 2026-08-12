@@ -22,8 +22,21 @@ function createBusinessEntity(data: PublicHomepageData, siteOrigin: string) {
     logo: `${siteOrigin}/logo-no-bg.png`,
     image: `${siteOrigin}${SOCIAL_IMAGE_PATH}`,
     description: SITE_DESCRIPTION,
+    priceRange: "IDR",
+    openingHours: "Mo-Su 08:00-22:00",
     areaServed: ["Jakarta", "Bogor", "Depok", "Tangerang", "Bekasi"],
-    ...(phone ? { telephone: `+${phone}` } : {}),
+    ...(phone
+      ? {
+          telephone: `+${phone}`,
+          contactPoint: {
+            "@type": "ContactPoint",
+            telephone: `+${phone}`,
+            contactType: "customer service",
+            areaServed: "ID",
+            availableLanguage: "Indonesian",
+          },
+        }
+      : {}),
     ...(settings?.email ? { email: settings.email } : {}),
     ...(instagramUrl ? { sameAs: [instagramUrl] } : {}),
     ...(settings?.address
