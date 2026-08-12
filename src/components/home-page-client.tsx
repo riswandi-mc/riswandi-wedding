@@ -477,7 +477,7 @@ export default function HomePageClient({ data }: HomePageClientProps) {
                 <Image src="https://images.unsplash.com/photo-1519741497674-611481863552?q=85&w=1100&auto=format&fit=crop" alt="Pasangan menikmati momen pernikahan yang hangat" fill sizes="(max-width: 1024px) 90vw, 45vw" className="object-cover saturate-[.82]" priority />
               </div>
               <div className="absolute bottom-8 left-0 h-36 w-28 overflow-hidden rounded-[5rem_5rem_1.25rem_1.25rem] border-[6px] border-background shadow-lg sm:h-48 sm:w-40 sm:border-8">
-                <Image src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=500&auto=format&fit=crop" alt="Dekorasi pernikahan elegan" fill sizes="160px" className="object-cover" />
+                <Image src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=500&auto=format&fit=crop" alt="Dekorasi pernikahan elegan" fill sizes="160px" className="object-cover" priority />
               </div>
               <div className="absolute right-0 top-7 grid size-28 rotate-6 place-items-center rounded-full bg-[#f1c875] p-4 text-center font-heading text-base font-semibold leading-tight text-primary shadow-lg sm:size-38 sm:p-7 sm:text-xl">
                 Warm, joyful & memorable

@@ -120,6 +120,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseOrigin = supabaseUrl ? new URL(supabaseUrl).origin : null;
   const data = await getPublicHomepageData();
 
   return (
@@ -128,6 +130,16 @@ export default async function RootLayout({
       data-scroll-behavior="smooth"
       className={cn("h-full antialiased", geistSans.variable, displayFont.variable)}
     >
+      <head>
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        {supabaseOrigin && (
+          <>
+            <link rel="preconnect" href={supabaseOrigin} />
+            <link rel="dns-prefetch" href={supabaseOrigin} />
+          </>
+        )}
+      </head>
       <body className="flex min-h-full flex-col font-sans">
         <TooltipProvider>
           <RootClientLayout settings={data.settings}>
