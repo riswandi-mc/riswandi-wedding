@@ -462,16 +462,28 @@ function sanitizeStorageFileName(value: string) {
   return `${slugify(basename) || "media"}${extension.replace(/[^a-z0-9.]/g, "")}`;
 }
 
+/** Extract file extension from a filename (without the dot). Falls back to the MIME subtype. */
+function getFileExtension(filename: string): string {
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex > 0) {
+    return filename.slice(dotIndex + 1).toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+  return "bin";
+}
+
 async function uploadPublicStorageFile({
   bucket,
   folder,
   file,
   expectedType,
+  descriptiveName,
 }: {
   bucket: "gallery" | "invitation-template";
   folder: string;
   file: File;
   expectedType?: "image" | "video";
+  /** SEO-friendly name derived from entity context (e.g. title, category, client name). */
+  descriptiveName?: string;
 }): Promise<MutationResult<{ publicUrl: string; storagePath: string }>> {
   if (!file || file.size === 0) {
     return {
@@ -495,7 +507,10 @@ async function uploadPublicStorageFile({
   }
 
   const supabase = await createClient();
-  const storagePath = `${folder}/${Date.now()}-${sanitizeStorageFileName(file.name)}`;
+  const baseName = descriptiveName
+    ? sanitizeStorageFileName(`${descriptiveName}.${getFileExtension(file.name)}`)
+    : sanitizeStorageFileName(file.name);
+  const storagePath = `${folder}/${Date.now()}-${baseName}`;
   const { error: uploadError } = await supabase.storage
     .from(bucket)
     .upload(storagePath, file, {
@@ -1191,6 +1206,7 @@ export async function createInvitationTemplate(
         folder: "preview",
         file: input.previewFile,
         expectedType: "image",
+        descriptiveName: `undangan-digital-${parsed.data.name}`,
       })
     : null;
 
@@ -1272,6 +1288,7 @@ export async function updateInvitationTemplate(
         folder: "preview",
         file: input.previewFile,
         expectedType: "image",
+        descriptiveName: `undangan-digital-${parsed.data.name}`,
       })
     : null;
 
@@ -1449,6 +1466,7 @@ export async function createTestimonial(
         folder: "testimonials",
         file: input.photoFile,
         expectedType: "image",
+        descriptiveName: `testimoni-${parsed.data.clientName}`,
       })
     : null;
 
@@ -1525,6 +1543,7 @@ export async function updateTestimonial(
         folder: "testimonials",
         file: input.photoFile,
         expectedType: "image",
+        descriptiveName: `testimoni-${parsed.data.clientName}`,
       })
     : null;
 
@@ -1704,7 +1723,10 @@ export async function createGalleryItemWithUpload(input: {
   }
 
   const supabase = await createClient();
-  const storagePath = `${parsed.data.mediaType}/${Date.now()}-${sanitizeStorageFileName(input.file.name)}`;
+  const descriptiveBaseName = sanitizeStorageFileName(
+    `${parsed.data.category}-${parsed.data.title}.${getFileExtension(input.file.name)}`,
+  );
+  const storagePath = `${parsed.data.mediaType}/${Date.now()}-${descriptiveBaseName}`;
   const { error: uploadError } = await supabase.storage
     .from("gallery")
     .upload(storagePath, input.file, {
