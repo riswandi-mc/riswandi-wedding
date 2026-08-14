@@ -2,9 +2,9 @@ import type { Metadata } from "next"
 
 export const SITE_NAME = "Riswandi Wedding"
 export const SITE_TITLE =
-  "Riswandi Wedding | MC & Undangan Digital Profesional"
+  "Riswandi Wedding - MC Profesional & Undangan Digital"
 export const SITE_DESCRIPTION =
-  "Riswandi Wedding menyediakan jasa MC wedding profesional di Jabodetabek dan undangan digital elegan agar acara berjalan hangat, rapi, dan berkesan."
+  "Riswandi Wedding menyediakan layanan pembuatan undangan pernikahan online yang modern dan hemat waktu, serta jasa MC profesional untuk momen tak terlupakan."
 export const SOCIAL_IMAGE_PATH = "/opengraph-image"
 
 export const DEFAULT_KEYWORDS = [

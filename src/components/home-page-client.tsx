@@ -434,15 +434,15 @@ export default function HomePageClient({ data }: HomePageClientProps) {
     <>
         <section className="relative overflow-hidden pb-16 pt-7 sm:pb-20 sm:pt-10 lg:pb-24 lg:pt-12">
           <div className="site-container grid items-center gap-10 lg:grid-cols-[1.02fr_.98fr] lg:gap-12">
-            <div className="relative z-10 w-full max-w-[calc(100vw-2rem)] lg:max-w-none">
+            <div className="relative z-10 w-full">
               <span className="section-eyebrow">MC Wedding & Undangan Digital</span>
-              <h1 className="display-title mt-5 w-full text-[2.25rem] leading-[1.1] text-primary sm:text-[3.25rem] md:text-[3.8rem] lg:text-[5rem] xl:text-[5.75rem]">
-                Momen besar, dibawakan <span className="block text-[#d98065] italic sm:inline">dengan hangat.</span>
+              <h1 className="display-title mt-5 w-full text-4xl leading-[1.1] text-primary sm:text-5xl md:text-6xl lg:text-[5rem] xl:text-[5.75rem]">
+                Riswandi Wedding: Momen besar, dibawakan <span className="block text-[#d98065] italic sm:inline">dengan hangat.</span>
               </h1>
-              <p className="mt-6 w-full max-w-[calc(100vw-2rem)] text-base leading-8 text-muted-foreground sm:max-w-xl sm:text-lg">
+              <p className="mt-6 w-full max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
                 {brandName} membantu acara Anda terasa rapi tanpa menjadi kaku—dengan MC yang peka pada suasana dan undangan digital yang berkesan sejak pertama dibuka.
               </p>
-              <div className="mt-8 flex w-full max-w-[calc(100vw-2rem)] flex-col gap-3 sm:max-w-xl sm:flex-row sm:flex-wrap">
+              <div className="mt-8 flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Button asChild size="lg">
                   <Link href="/layanan-mc">Lihat Paket & Cek Jadwal <ArrowRight className="size-4" /></Link>
                 </Button>

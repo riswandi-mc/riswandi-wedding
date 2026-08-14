@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpRight, Menu, MessageCircle } from "lucide-react"
@@ -43,6 +46,26 @@ function getContactDetails(settings: Settings) {
 
 export function PublicHeader({ settings }: { settings: Settings }) {
   const { brandName, whatsappUrl } = getContactDetails(settings)
+  const menuRef = useRef<HTMLDetailsElement>(null)
+
+  const closeMenu = () => {
+    if (menuRef.current) {
+      menuRef.current.removeAttribute("open")
+    }
+  }
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        menuRef.current.removeAttribute("open")
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
 
   return (
     <>
@@ -80,17 +103,17 @@ export function PublicHeader({ settings }: { settings: Settings }) {
             </Button>
           </nav>
 
-          <details className="group lg:hidden">
+          <details ref={menuRef} className="group lg:hidden">
             <summary className="grid size-11 cursor-pointer list-none place-items-center rounded-full border border-border bg-secondary text-primary shadow-[0_3px_0_#adbea8] outline-none transition-transform active:translate-y-0.5 [&::-webkit-details-marker]:hidden" aria-label="Buka menu utama">
               <Menu className="size-5" aria-hidden="true" />
             </summary>
             <div className="absolute left-0 right-0 top-[calc(100%+.65rem)] grid gap-1 rounded-[1.5rem] border border-border bg-card p-3 shadow-[0_24px_60px_rgba(23,62,49,.2)]">
               {navigation.map((item) => (
-                <Link key={item.href} href={item.href} className="rounded-xl px-4 py-3 text-sm font-semibold hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <Link key={item.href} href={item.href} onClick={closeMenu} className="rounded-xl px-4 py-3 text-sm font-semibold hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   {item.label}
                 </Link>
               ))}
-              <Link href="/kontak" className="rounded-xl px-4 py-3 text-sm font-semibold hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Link href="/kontak" onClick={closeMenu} className="rounded-xl px-4 py-3 text-sm font-semibold hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 Kontak
               </Link>
               <Button asChild className="mt-2 w-full">
